@@ -1,5 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
+import { getImage } from 'astro:assets';
 import ResearchTimeline, { type ResearchItem } from '@/components/research/ResearchTimeline';
 import Archive, { type ArchivePaper } from '@/components/archive/Archive';
 import Filmstrip, { type FilmNote } from '@/components/film/Filmstrip';
@@ -38,7 +39,7 @@ const researchItems: ResearchItem[] = await Promise.all(
   })),
 );
 
-const papers: ArchivePaper[] = publications.map((p, i) => ({
+const papers: ArchivePaper[] = await Promise.all(publications.map(async (p, i) => ({
   id: p.id,
   number: pad2(i + 1),
   title: p.data.title,
@@ -47,8 +48,9 @@ const papers: ArchivePaper[] = publications.map((p, i) => ({
   summary: p.data.summary,
   href: publicationHref(p),
   figureKind: p.data.figureKind,
+  figureSrc: p.data.figure ? (await getImage({ src: p.data.figure, width: Math.min(1200, p.data.figure.width), format: 'webp', quality: 85 })).src : undefined,
   demo: p.data.demo,
-}));
+})));
 
 const filmNotes: FilmNote[] = await Promise.all(
   notes.map(async (n) => ({

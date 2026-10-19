@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { Canvas, useThree, type ThreeEvent } from '@react-three/fiber';
 import { ContactShadows, Environment, Lightformer } from '@react-three/drei';
 import * as THREE from 'three';
@@ -22,6 +22,96 @@ const FILE = { w: 2.42, h: 2.85, thick: 0.075 };
 const TAB = { w: 0.48, h: 0.27 };
 const LEAN = -0.17; // radians, files lean back
 const HEIGHTS = [0.0, 0.16, 0.06, 0.22, 0.1, 0.18];
+/** Hover pose: how far a file rises and comes forward, and how much it straightens. */
+const LIFT = { y: 0.5, z: 0.22, lean: LEAN * 0.55 };
+/** Viewing direction (camera position relative to the subject). Distance is fitted automatically. */
+const VIEW_DIR = new THREE.Vector3(7.15, 2.75, 8.6).normalize();
+/** Fraction of the canvas the framed object may fill (leaves a margin on every side). */
+const FILL = 0.86;
+
+const fileBase = (index: number, count: number) => {
+  const spacing = (BOX.d - 0.7) / Math.max(1, count - 1);
+  return { z: BOX.d / 2 - 0.42 - index * spacing, y: BOX.t + HEIGHTS[index % HEIGHTS.length] };
+};
+
+/**
+ * Points that must always stay in view: the box, its shadow footprint, and every file
+ * both at rest and fully lifted (including its tab).
+ */
+function framingPoints(count: number) {
+  const pts: THREE.Vector3[] = [];
+  const { w, d, h } = BOX;
+  for (const x of [-w / 2 - 0.15, w / 2 + 0.15])
+    for (const y of [0, h])
+      for (const z of [-d / 2 - 0.15, d / 2 + 0.15]) pts.push(new THREE.Vector3(x, y, z));
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < count; i++) {
+    const b = fileBase(i, count);
+    for (const [dy, dz, lean] of [
+      [0, 0, LEAN],
+      [LIFT.y, LIFT.z, LIFT.lean],
+    ]) {
+      m.compose(new THREE.Vector3(0, b.y + dy, b.z + dz), new THREE.Quaternion().setFromEuler(new THREE.Euler(lean, 0, 0)), new THREE.Vector3(1, 1, 1));
+      for (const x of [-FILE.w / 2, FILE.w / 2])
+        for (const y of [0, FILE.h + TAB.h]) pts.push(new THREE.Vector3(x, y, 0).applyMatrix4(m));
+    }
+  }
+  return pts;
+}
+
+/** Fits the camera to the framing points for the current canvas size, keeping the viewing angle. */
+function AutoFrame({ count }: { count: number }) {
+  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
+  const size = useThree((s) => s.size);
+  const invalidate = useThree((s) => s.invalidate);
+
+  useLayoutEffect(() => {
+    if (!size.width || !size.height) return;
+    const pts = framingPoints(count);
+    const target = new THREE.Box3().setFromPoints(pts).getCenter(new THREE.Vector3());
+    const v = new THREE.Vector3();
+    const place = (dist: number) => {
+      camera.position.copy(target).addScaledVector(VIEW_DIR, dist);
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+    };
+    const extent = () => {
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (const p of pts) {
+        v.copy(p).project(camera);
+        minX = Math.min(minX, v.x); maxX = Math.max(maxX, v.x);
+        minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
+      }
+      return { minX, maxX, minY, maxY };
+    };
+    camera.aspect = size.width / size.height;
+    camera.updateProjectionMatrix();
+    let dist = 10;
+    // Centre the projected bounds, then find the distance at which they fill FILL of the frame.
+    for (let pass = 0; pass < 4; pass++) {
+      let lo = 2, hi = 60;
+      for (let k = 0; k < 30; k++) {
+        dist = (lo + hi) / 2;
+        place(dist);
+        const e = extent();
+        const span = Math.max(e.maxX - e.minX, e.maxY - e.minY);
+        if (span > 2 * FILL) lo = dist; else hi = dist;
+      }
+      dist = hi;
+      place(dist);
+      const e = extent();
+      const halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * dist;
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+      target.addScaledVector(up, ((e.maxY + e.minY) / 2) * halfH);
+      target.addScaledVector(right, ((e.maxX + e.minX) / 2) * halfH * camera.aspect);
+    }
+    place(dist);
+    invalidate();
+  }, [camera, size.width, size.height, count, invalidate]);
+
+  return null;
+}
 
 /* ------------------------------------------------------------------ */
 /* Procedural textures                                                 */
@@ -64,7 +154,7 @@ function boardTexture() {
   return t;
 }
 
-function paperTexture(paper: ArchivePaper, index: number) {
+function paperTexture(paper: ArchivePaper, index: number, onUpdate: () => void) {
   const W = 704;
   const H = Math.round((W * FILE.h) / FILE.w);
   const c = document.createElement('canvas');
@@ -94,18 +184,72 @@ function paperTexture(paper: ArchivePaper, index: number) {
   const soft = 'rgba(40,38,34,0.28)';
   const M = 56;
 
-  // header: abstract text lines (not real words)
-  g.fillStyle = soft;
-  for (let i = 0; i < 3; i++) g.fillRect(M, 48 + i * 15, (W - 2 * M) * (0.35 + r() * 0.4), 5);
+  // header: the paper's own title when a real figure is supplied, otherwise abstract text lines
+  let headerBottom = 120;
+  if (paper.figureSrc) {
+    g.fillStyle = ink;
+    g.font = '500 25px "Geist Variable", Helvetica, Arial, sans-serif';
+    const words = paper.title.split(' ');
+    const lines: string[] = [];
+    let line = '';
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (g.measureText(test).width > W - 2 * M - 90 && line) {
+        lines.push(line);
+        line = w;
+      } else line = test;
+    }
+    if (line) lines.push(line);
+    lines.slice(0, 3).forEach((l, i) => g.fillText(l, M, 62 + i * 31));
+    g.font = '15px ui-monospace, Menlo, monospace';
+    g.fillStyle = 'rgba(40,38,34,0.6)';
+    const yAfter = 62 + Math.min(lines.length, 3) * 31;
+    g.fillText(`${paper.venue} · ${paper.year}`, M, yAfter + 6);
+    headerBottom = yAfter + 34;
+  } else {
+    g.fillStyle = soft;
+    for (let i = 0; i < 3; i++) g.fillRect(M, 48 + i * 15, (W - 2 * M) * (0.35 + r() * 0.4), 5);
+  }
   g.font = '500 15px ui-monospace, Menlo, monospace';
   g.fillStyle = ink;
   g.textAlign = 'right';
   g.fillText(`No. ${paper.number}`, W - M, 56);
   g.textAlign = 'left';
 
-  // figure box
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+
+  // real figure from the paper: fitted into the figure area, printed onto the sheet
+  if (paper.figureSrc) {
+    const bx = M;
+    const by = headerBottom;
+    const bw = W - 2 * M;
+    const bh = H - by - 70;
+    const im = new Image();
+    im.decoding = 'async';
+    im.onload = () => {
+      const s = Math.min(bw / im.naturalWidth, bh / im.naturalHeight);
+      const dw = im.naturalWidth * s;
+      const dh = im.naturalHeight * s;
+      g.save();
+      g.globalCompositeOperation = 'multiply';
+      g.globalAlpha = 0.95;
+      g.drawImage(im, bx + (bw - dw) / 2, by, dw, dh);
+      g.restore();
+      g.font = '13px ui-monospace, Menlo, monospace';
+      g.fillStyle = soft;
+      g.fillText(`FIG. — FILE ${paper.number}`, M, Math.min(by + dh + 30, H - 30));
+      t.needsUpdate = true;
+      onUpdate();
+    };
+    im.src = paper.figureSrc;
+    return t;
+  }
+
+  // figure box (illustrative placeholder when no figure is supplied)
   const fx = M + 26;
-  const fy = 120;
+  const fy = headerBottom;
   const fw = W - 2 * M - 40;
   const fh = H * 0.48;
   g.strokeStyle = ink;
@@ -160,9 +304,7 @@ function paperTexture(paper: ArchivePaper, index: number) {
     y += 12;
   }
 
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 8;
+  t.needsUpdate = true;
   return t;
 }
 
@@ -253,7 +395,7 @@ interface FileProps {
 function Dossier({ paper, index, count, active, dimmed, onActive, onOpen }: FileProps) {
   const ref = useRef<THREE.Group>(null);
   const invalidate = useThree((s) => s.invalidate);
-  const front = useMemo(() => paperTexture(paper, index), [paper, index]);
+  const front = useMemo(() => paperTexture(paper, index, invalidate), [paper, index, invalidate]);
   const tab = useMemo(() => tabTexture(paper.number), [paper.number]);
 
   const mats = useMemo(() => {
@@ -266,9 +408,7 @@ function Dossier({ paper, index, count, active, dimmed, onActive, onOpen }: File
   }, [front, tab]);
 
   // Base pose: spaced from the front of the box to the back.
-  const spacing = (BOX.d - 0.7) / Math.max(1, count - 1);
-  const baseZ = BOX.d / 2 - 0.42 - index * spacing;
-  const baseY = BOX.t + HEIGHTS[index % HEIGHTS.length];
+  const { z: baseZ, y: baseY } = fileBase(index, count);
   const tabX = -FILE.w / 2 + TAB.w / 2 + 0.12 + (index * (FILE.w * 0.42)) / Math.max(1, count - 1);
 
   useEffect(() => {
@@ -276,8 +416,8 @@ function Dossier({ paper, index, count, active, dimmed, onActive, onOpen }: File
     if (!g) return;
     const dur = 0.38;
     const tl = gsap.timeline({ onUpdate: invalidate, defaults: { duration: dur, ease: 'power2.out', overwrite: 'auto' } });
-    tl.to(g.position, { y: baseY + (active ? 0.5 : 0), z: baseZ + (active ? 0.22 : 0) }, 0);
-    tl.to(g.rotation, { x: active ? LEAN * 0.55 : LEAN }, 0);
+    tl.to(g.position, { y: baseY + (active ? LIFT.y : 0), z: baseZ + (active ? LIFT.z : 0) }, 0);
+    tl.to(g.rotation, { x: active ? LIFT.lean : LEAN }, 0);
     mats.face.color.set(dimmed ? '#ece8df' : '#ffffff');
     invalidate();
     return () => {
@@ -381,6 +521,7 @@ function Scene({ papers, active, onActive, onOpen }: Omit<SceneProps, 'onReady'>
           />
         ))}
       </group>
+      <AutoFrame count={papers.length} />
       <ContactShadows position={[0, 0.001, 0]} scale={9} resolution={1024} far={2.2} blur={2.6} opacity={0.42} color="#3b362e" />
     </>
   );
@@ -392,10 +533,10 @@ export default function ArchiveScene({ papers, active, onActive, onOpen, onReady
       frameloop="demand"
       shadows={{ type: THREE.PCFShadowMap }}
       dpr={[1, 2]}
-      camera={{ position: [6.9, 4.3, 8.2], fov: 25, near: 0.1, far: 60 }}
+      camera={{ position: [6.9, 4.3, 8.2], fov: 25, near: 0.1, far: 80 }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'low-power' }}
-      onCreated={({ camera, invalidate }) => {
-        camera.lookAt(-0.25, 1.55, -0.4);
+      onCreated={({ invalidate }) => {
+        // Camera placement is handled by <AutoFrame />.
         invalidate();
         requestAnimationFrame(onReady);
       }}

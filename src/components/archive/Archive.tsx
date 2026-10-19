@@ -11,6 +11,8 @@ export interface ArchivePaper {
   summary: string;
   href: string;
   figureKind: FigureKind;
+  /** Optimised URL of the paper's own figure, printed on the dossier when present. */
+  figureSrc?: string;
   demo: boolean;
 }
 
