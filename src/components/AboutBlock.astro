@@ -10,12 +10,25 @@ import { getProfile } from '@/lib/content';
 const profile = await getProfile();
 const { Content } = await render(profile);
 const d = profile.data;
+
+/** Research themes arranged around "Quantum Optics" in the glass panel (x, y: centre as fractions of the panel). */
+const cloud = [
+  { text: 'AMO Physics', x: 0.24, y: 0.17, size: 0.42, weight: 500, opacity: 0.92 },
+  { text: 'Ultracold Polar Molecules', x: 0.67, y: 0.14, size: 0.26, weight: 400, opacity: 0.72 },
+  { text: 'Optical tweezers', x: 0.21, y: 0.31, size: 0.2, weight: 300, opacity: 0.55 },
+  { text: 'Atom Arrays', x: 0.79, y: 0.3, size: 0.3, weight: 500, opacity: 0.8 },
+  { text: 'Rydberg Atom Quantum Simulation', x: 0.33, y: 0.71, size: 0.24, weight: 400, opacity: 0.7 },
+  { text: 'Neutral-atom Quantum Computing', x: 0.77, y: 0.74, size: 0.2, weight: 300, opacity: 0.55 },
+  { text: 'Microwave Shielding', x: 0.56, y: 0.87, size: 0.34, weight: 500, opacity: 0.85 },
+  { text: 'Dipolar Fermi Gases', x: 0.16, y: 0.88, size: 0.22, weight: 400, opacity: 0.65 },
+];
 ---
 
 <div class="about-glass">
   <FluidGlass
     client:visible
     text={"Quantum Optics"}
+    cloud={cloud}
     background="#f8f8f5"
     shape="torus"
     size={260}

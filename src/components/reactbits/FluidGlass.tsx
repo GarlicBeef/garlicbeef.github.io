@@ -3,6 +3,21 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import './FluidGlass.css';
 
+/** ADDED (local): a word drawn around the main text, on the same refracted layer. */
+export interface CloudWord {
+  text: string;
+  /** Centre of the word, as fractions of the panel width and height. */
+  x: number;
+  y: number;
+  /** Font size as a multiple of the main text's size. */
+  size: number;
+  weight?: number | string;
+  /** 0–1, applied on top of the text colour. */
+  opacity?: number;
+  /** Degrees. */
+  rotate?: number;
+}
+
 type Shape = 'lens' | 'blob' | 'cube' | 'pill' | 'torus' | 'prism' | 'diamond';
 type Interaction = 'follow' | 'drag' | 'static';
 type Uniforms = Record<string, WebGLUniformLocation | null>;
@@ -40,10 +55,13 @@ export interface FluidGlassProps {
   className?: string;
   style?: CSSProperties;
   children?: ReactNode;
+  /** ADDED (local): extra words arranged around the main text. */
+  cloud?: CloudWord[];
 }
 
 interface Settings {
   text: string;
+  cloud: CloudWord[];
   textColor?: string;
   fontFamily?: string;
   fontWeight: number | string;
@@ -666,7 +684,8 @@ const FluidGlass = ({
   maxDevicePixelRatio = 2,
   className = '',
   style,
-  children
+  children,
+  cloud = []
 }: FluidGlassProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -677,6 +696,7 @@ const FluidGlass = ({
   const cycle = Array.isArray(shapes) && shapes.length ? shapes.filter(name => SHAPES.includes(name)) : SHAPES;
   const settings: Settings = {
     text: String(text ?? ''),
+    cloud,
     textColor,
     fontFamily,
     fontWeight,
@@ -869,7 +889,7 @@ const FluidGlass = ({
       const fill = s.textColor || computed.color || '#ffffff';
       const width = canvas.width;
       const height = canvas.height;
-      const key = [s.text, family, fill, s.fontWeight, s.fontSize, width, height].join('|');
+      const key = [s.text, JSON.stringify(s.cloud), family, fill, s.fontWeight, s.fontSize, width, height].join('|');
       if (key === textState.key) return;
       textState.key = key;
       textCanvas.width = width;
@@ -901,6 +921,26 @@ const FluidGlass = ({
           ctx.fillText(line, width / 2, y);
           y += lineHeight;
         });
+        // ADDED (local): word cloud around the main text, sized relative to it.
+        ctx.textBaseline = 'middle';
+        for (const w of s.cloud) {
+          let wpx = Math.max(w.size * px, 11 * ratio);
+          ctx.save();
+          ctx.font = `${w.weight ?? 400} ${wpx}px ${family}`;
+          // Keep every word inside the panel: shrink it if it would cross either edge.
+          const room = 2 * Math.min(w.x, 1 - w.x) * width - 12 * ratio;
+          const measured = ctx.measureText(w.text).width;
+          if (measured > room && room > 0) {
+            wpx *= room / measured;
+            ctx.font = `${w.weight ?? 400} ${wpx}px ${family}`;
+          }
+          if ('letterSpacing' in ctx) ctx.letterSpacing = `${-0.015 * wpx}px`;
+          ctx.globalAlpha = w.opacity ?? 1;
+          ctx.translate(w.x * width, w.y * height);
+          if (w.rotate) ctx.rotate((w.rotate * Math.PI) / 180);
+          ctx.fillText(w.text, 0, 0);
+          ctx.restore();
+        }
       }
       gl.bindTexture(gl.TEXTURE_2D, textTexture);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
@@ -1516,7 +1556,12 @@ const FluidGlass = ({
     >
       <canvas ref={canvasRef} className="fluid-glass__canvas" aria-hidden="true" />
       <div ref={handleRef} className="fluid-glass__handle" aria-hidden="true" />
-      {text ? <p className="fluid-glass__label">{text}</p> : null}
+      {text ? (
+        <p className="fluid-glass__label">
+          {text}
+          {cloud.length ? ` — ${cloud.map(w => w.text).join(', ')}` : ''}
+        </p>
+      ) : null}
       {children ? <div className="fluid-glass__content">{children}</div> : null}
     </div>
   );
