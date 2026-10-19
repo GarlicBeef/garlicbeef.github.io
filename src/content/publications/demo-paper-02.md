@@ -1,7 +1,7 @@
 ---
 order: 2
 title: "Demonstration paper — scattering from a disordered sample"
-authors: ["NAME SURNAME", "Co-author C"]
+authors: ["Weikun Tian", "Co-author C"]
 year: 2024
 venue: "Journal name (to be supplied)"
 summary: "Placeholder summary: one sentence describing the experiment and its main observation."

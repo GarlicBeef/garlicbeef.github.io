@@ -1,7 +1,7 @@
 ---
 order: 4
 title: "Demonstration paper — spectroscopy of a calibration source"
-authors: ["NAME SURNAME"]
+authors: ["Weikun Tian"]
 year: 2022
 venue: "Preprint (to be supplied)"
 summary: "Placeholder summary: one sentence describing the method."

@@ -1,5 +1,5 @@
 ---
-name: NAME SURNAME
+name: Weikun Tian
 role: Experimental physicist
 # researchField: e.g. "Quantum optics"     ← fill in when supplied
 # affiliation: e.g. "Institute, University" ← fill in when supplied
@@ -11,7 +11,7 @@ demo: true
 ---
 
 **Demonstration biography.** This paragraph is a placeholder for a short biography: current position,
-research interests, and how the work developed. Nothing here describes a real person yet.
+research interests, and how the work developed. None of this text is real biographical information yet.
 
 A second paragraph might cover education and previous positions, and a third the things outside the lab —
 here, a long-standing love of film, which the Field Notes on the homepage partly record.

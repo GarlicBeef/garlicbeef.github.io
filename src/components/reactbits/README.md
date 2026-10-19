@@ -4,3 +4,5 @@ not for redistribution as standalone components.
 
 - FadeContent.tsx — GSAP-powered reveal (used with the `develop` effect on detail-page photographs)
 - Noise.tsx / Noise.css — film-grain overlay (used very lightly on the Field Notes filmstrip)
+- OptionWheel.tsx / OptionWheel.css — curved year selector in Research (locally extended: scroll-driven, no wheel capture; see header comment)
+- FluidGlass.tsx / FluidGlass.css — WebGL liquid-glass lens (About page, over `public/hero.jpg`)

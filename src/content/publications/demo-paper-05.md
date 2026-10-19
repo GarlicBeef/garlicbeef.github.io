@@ -1,7 +1,7 @@
 ---
 order: 5
 title: "Demonstration paper — interferometric surface profiling"
-authors: ["Co-author F", "NAME SURNAME"]
+authors: ["Co-author F", "Weikun Tian"]
 year: 2020
 venue: "Journal name (to be supplied)"
 summary: "Placeholder summary: one sentence describing the result."

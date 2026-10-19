@@ -1,7 +1,6 @@
 /* ---------- Research timeline ---------- */
 .rt {
   --drum-h: clamp(300px, 46vh, 440px);
-  --R: calc(var(--drum-h) * 0.34);
   --caption-h: 104px;
   position: relative;
 }
@@ -98,54 +97,25 @@
 }
 .rt__step button:disabled { color: var(--faint); cursor: default; }
 
-/* ---------- Year drum ---------- */
+/* ---------- Year wheel (React Bits OptionWheel, driven by page scroll) ---------- */
 .rt__drum {
   position: relative;
   width: 100%;
   height: var(--drum-h);
-  perspective: 900px;
-  perspective-origin: 50% 50%;
-  transform-style: preserve-3d;
+  /* soft fade at the ends of the wheel */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
 }
-
-/* An almost invisible glass drum: two soft edges and a hint of curvature. */
-.rt__glass {
-  position: absolute;
-  inset: 2% 4%;
-  border-radius: 46% / 50%;
-  pointer-events: none;
-  box-shadow:
-    inset 10px 0 18px -16px rgba(0, 0, 0, 0.22),
-    inset -10px 0 18px -16px rgba(0, 0, 0, 0.22);
-  -webkit-mask-image: linear-gradient(180deg, transparent 4%, #000 30%, #000 70%, transparent 96%);
-  mask-image: linear-gradient(180deg, transparent 4%, #000 30%, #000 70%, transparent 96%);
-}
-
-.rt__year {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  margin: 0 auto;
-  width: max-content;
-  padding: 4px 10px;
-  background: none;
-  border: 0;
-  cursor: pointer;
+.rt__wheel.option-wheel {
+  cursor: default;
+  touch-action: pan-y; /* the page keeps scrolling over the wheel on touch screens */
   font-family: var(--sans);
-  font-weight: 300;
-  font-size: clamp(40px, 4.2vw, 66px);
-  line-height: 1;
-  letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums lining-nums;
-  color: var(--faint);
-  backface-visibility: hidden;
-  transform-origin: 50% 50%;
-  transition: color var(--t-fast) var(--ease);
+  letter-spacing: 0.01em;
 }
-.rt__year.is-active { color: var(--ink); font-weight: 350; }
-.rt__year:hover { color: var(--ink-2); }
-.rt__year:focus-visible { outline-offset: 2px; }
+.rt__wheel .option-wheel__item { font-weight: 300; transition: font-weight var(--t-fast) var(--ease); }
+.rt__wheel .option-wheel__item--selected { font-weight: 400; }
+.rt__wheel:focus-visible { outline: 1.5px solid var(--ink); outline-offset: -1.5px; }
 
 .rt__aside {
   align-self: start;
@@ -166,7 +136,7 @@
 
 /* ---------- Stacked / static mode ---------- */
 @media (max-width: 899px) {
-  .rt { --drum-h: 190px; --R: 84px; --caption-h: auto; }
+  .rt { --drum-h: 190px; --caption-h: auto; }
   .rt__grid {
     grid-template-columns: 1fr;
     grid-template-areas: 'frame' 'drum' 'caption';
@@ -174,7 +144,6 @@
   }
   .rt__frame { width: 100%; }
   .rt__drum { height: var(--drum-h); width: min(240px, 70%); justify-self: center; }
-  .rt__year { font-size: 38px; }
   .rt__aside { display: none; }
   .rt__caption-row { flex-direction: column; gap: 12px; }
 }

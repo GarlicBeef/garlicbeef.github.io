@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import OptionWheel, { type OptionWheelHandle } from '../reactbits/OptionWheel';
 import './research.css';
 
 export interface ResearchItem {
@@ -24,27 +25,10 @@ interface Props {
 const STEP_VH = 0.55;
 /** Dwell at the start and end of the sequence. */
 const HOLD_VH = 0.22;
-/** Angular spacing of years on the drum. */
-const STEP_DEG = 34;
-
 const SCROLL_MQ = '(min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
 const REDUCE_MQ = '(prefers-reduced-motion: reduce)';
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
-/** Position of year label i on the drum when the drum is at continuous year position yp. */
-function labelStyle(i: number, yp: number) {
-  const deg = -(i - yp) * STEP_DEG;
-  const c = Math.cos((deg * Math.PI) / 180);
-  const vis = Math.abs(deg) < 84;
-  const opacity = vis ? +Math.pow(clamp((c - 0.18) / 0.82, 0, 1), 1.7).toFixed(3) : 0;
-  return {
-    // --R (drum radius) is defined in CSS so the server render already has the final geometry.
-    transform: `translateY(-50%) translateZ(calc(var(--R) * -1)) rotateX(${deg.toFixed(2)}deg) translateZ(var(--R))`,
-    opacity,
-    visibility: (vis ? 'visible' : 'hidden') as 'visible' | 'hidden',
-  };
-}
-
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function ResearchTimeline({ items, sizes }: Props) {
@@ -58,7 +42,8 @@ export default function ResearchTimeline({ items, sizes }: Props) {
   const [missing, setMissing] = useState<Record<string, boolean>>({});
 
   const trackRef = useRef<HTMLDivElement>(null);
-    const labelRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const wheelRef = useRef<OptionWheelHandle>(null);
+  const [compact, setCompact] = useState(false);
   const posRef = useRef(0);
   const activeRef = useRef(0);
   const stRef = useRef<ScrollTrigger | null>(null);
@@ -78,14 +63,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
   const render = useCallback(
     (p: number) => {
       posRef.current = p;
-      const yp = yearPos(p);
-      labelRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const st = labelStyle(i, yp);
-        el.style.transform = st.transform;
-        el.style.opacity = String(st.opacity);
-        el.style.visibility = st.visibility;
-      });
+      wheelRef.current?.setPosition(yearPos(p));
       const idx = clamp(Math.round(p), 0, n - 1);
       if (idx !== activeRef.current) {
         activeRef.current = idx;
@@ -98,10 +76,18 @@ export default function ResearchTimeline({ items, sizes }: Props) {
   // Decide mode from the same media query the CSS uses.
   useIsoLayoutEffect(() => {
     const mq = window.matchMedia(SCROLL_MQ);
-    const set = () => setMode(mq.matches ? 'scroll' : 'static');
+    const narrow = window.matchMedia('(max-width: 899px)');
+    const set = () => {
+      setMode(mq.matches ? 'scroll' : 'static');
+      setCompact(narrow.matches);
+    };
     set();
     mq.addEventListener('change', set);
-    return () => mq.removeEventListener('change', set);
+    narrow.addEventListener('change', set);
+    return () => {
+      mq.removeEventListener('change', set);
+      narrow.removeEventListener('change', set);
+    };
   }, []);
 
   // Scroll-linked mode: the page scroll is the only driver; no wheel capture, no nested scrolling.
@@ -161,19 +147,6 @@ export default function ResearchTimeline({ items, sizes }: Props) {
     [mode, n, render],
   );
 
-  const activeYearIdx = yearIndexOf[active];
-
-  const onYearKey = (e: KeyboardEvent<HTMLButtonElement>, j: number) => {
-    let next = -1;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = Math.min(years.length - 1, j + 1);
-    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = Math.max(0, j - 1);
-    if (e.key === 'Home') next = 0;
-    if (e.key === 'End') next = years.length - 1;
-    if (next < 0) return;
-    e.preventDefault();
-    goTo(firstOfYear[next]);
-    labelRefs.current[next]?.focus({ preventScroll: true });
-  };
 
   const sameYear = items.filter((i) => i.year === items[active].year);
   const posInYear = sameYear.findIndex((i) => i.id === items[active].id);
@@ -250,26 +223,29 @@ export default function ResearchTimeline({ items, sizes }: Props) {
               )}
             </div>
 
-            <div className="rt__drum" role="group" aria-label="Research by year">
-              <span className="rt__glass" aria-hidden="true" />
-              {years.map((y, j) => (
-                <button
-                  key={y}
-                  type="button"
-                  ref={(el) => {
-                    labelRefs.current[j] = el;
-                  }}
-                  className={`rt__year${j === activeYearIdx ? ' is-active' : ''}`}
-                  aria-current={j === activeYearIdx ? 'true' : undefined}
-                  aria-label={`${y}${j === activeYearIdx ? ', selected' : ''}`}
-                  tabIndex={j === activeYearIdx ? 0 : -1}
-                  onClick={() => goTo(firstOfYear[j])}
-                  onKeyDown={(e) => onYearKey(e, j)}
-                  style={labelStyle(j, 0)}
-                >
-                  {y}
-                </button>
-              ))}
+            <div className="rt__drum">
+              <OptionWheel
+                handle={wheelRef}
+                controlled
+                captureWheel={false}
+                draggable={false}
+                ariaLabel="Research by year — use the arrow keys to choose a year"
+                items={years.map(String)}
+                defaultSelected={0}
+                onChange={(j) => goTo(firstOfYear[j])}
+                textColor="#a9a9a3"
+                activeColor="#161615"
+                side="left"
+                fontSize={compact ? 2.5 : 3.6}
+                spacing={1.3}
+                curve={1}
+                tilt={compact ? 10 : 9}
+                blur={1}
+                fade={0.3}
+                minOpacity={0}
+                inset={compact ? 24 : 36}
+                className="rt__wheel"
+              />
             </div>
             <p className="meta rt__aside">Selected experiments, over time</p>
         </div>

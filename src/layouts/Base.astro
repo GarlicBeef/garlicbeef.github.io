@@ -10,10 +10,12 @@ interface Props {
   current?: 'research' | 'publications' | 'about' | 'notes';
   /** Responsive image to preload (the first research photograph on the homepage). */
   preload?: { srcSet: string; sizes: string; src: string };
+  /** Set to false to omit the site footer (e.g. on About). */
+  footer?: boolean;
 }
 
 const profile = await getProfile();
-const { title, description, current, preload } = Astro.props;
+const { title, description, current, preload, footer = true } = Astro.props;
 const fullTitle = title ? `${title} — ${profile.data.name}` : `${profile.data.name} — ${profile.data.role}`;
 const desc =
   description ??
@@ -40,13 +42,15 @@ const desc =
     <main id="main">
       <slot />
     </main>
-    <footer class="site-footer wrap">
-      <hr class="rule" />
-      <div class="site-footer__row meta">
-        <span>Research / Films / Everyday observations</span>
-        <span>© {new Date().getFullYear()} {profile.data.name}</span>
-      </div>
-    </footer>
+    {footer && (
+      <footer class="site-footer wrap">
+        <hr class="rule" />
+        <div class="site-footer__row meta">
+          <span>Research / Films / Everyday observations</span>
+          <span>© {new Date().getFullYear()} {profile.data.name}</span>
+        </div>
+      </footer>
+    )}
   </body>
 </html>
 

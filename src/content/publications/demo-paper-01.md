@@ -1,7 +1,7 @@
 ---
 order: 1
 title: "Demonstration paper — noise characterisation of an optical cavity"
-authors: ["NAME SURNAME", "Co-author A", "Co-author B"]
+authors: ["Weikun Tian", "Co-author A", "Co-author B"]
 year: 2025
 venue: "Journal name (to be supplied)"
 summary: "Placeholder summary: one sentence describing what the paper measures and why it matters."

@@ -1,4 +1,4 @@
-# NAME SURNAME — personal website
+# Weikun Tian — personal website
 
 An exhibition-style homepage for an experimental physicist, in three rooms:
 

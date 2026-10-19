@@ -392,10 +392,10 @@ export default function ArchiveScene({ papers, active, onActive, onOpen, onReady
       frameloop="demand"
       shadows={{ type: THREE.PCFShadowMap }}
       dpr={[1, 2]}
-      camera={{ position: [6.4, 3.9, 7.6], fov: 25, near: 0.1, far: 60 }}
+      camera={{ position: [6.9, 4.3, 8.2], fov: 25, near: 0.1, far: 60 }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping, powerPreference: 'low-power' }}
       onCreated={({ camera, invalidate }) => {
-        camera.lookAt(-0.25, 1.15, -0.4);
+        camera.lookAt(-0.25, 1.55, -0.4);
         invalidate();
         requestAnimationFrame(onReady);
       }}
