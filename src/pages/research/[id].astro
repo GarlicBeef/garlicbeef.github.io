@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import FadeContent from '@/components/reactbits/FadeContent';
+import { getResearch, researchHref } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const all = await getResearch();
+  return all.map((entry, i) => ({ params: { id: entry.id }, props: { entry, newer: all[i - 1], older: all[i + 1] } }));
+}
+
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+
+<Base title={d.title} current="research" description={`${d.title} (${d.year}). ${d.caption}.`}>
+  <article class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href="/#research">01 — Research</a> / {d.year}</p>
+      <h1 class="page-title">{d.title}</h1>
+    </header>
+
+    <FadeContent client:load effect="develop" duration={0.9} trigger="mount" className="detail-photo">
+      <Image src={d.image} alt={d.imageAlt} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 900px) 100vw, 80vw" loading="eager" fetchpriority="high" />
+    </FadeContent>
+
+    <div class="detail-grid">
+      <dl class="dl">
+        <dt>Project</dt><dd>{d.title}</dd>
+        <dt>Setup</dt><dd>{d.caption}</dd>
+        {d.location && (<><dt>Location</dt><dd>{d.location}</dd></>)}
+        <dt>Year</dt><dd>{d.year}</dd>
+      </dl>
+      <div>
+        {d.demo && <p class="notice">Demonstration content — the image is an illustrative render and the text is placeholder copy.</p>}
+        <div class="prose"><Content /></div>
+      </div>
+    </div>
+
+    <nav class="pager" aria-label="More research">
+      {newer ? <a href={researchHref(newer)}>← {newer.data.year} · {newer.data.title}</a> : <a href="/#research">← Back to research</a>}
+      {older ? <a href={researchHref(older)}>{older.data.year} · {older.data.title} →</a> : <a href="/research/">All research →</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  :global(.detail-photo) { background: #e8e8e3; margin-bottom: 18px; }
+  :global(.detail-photo img) { width: 100%; height: auto; max-height: 78vh; object-fit: cover; }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 30%) 1fr;
+    gap: 48px;
+    margin-top: 40px;
+  }
+  @media (max-width: 800px) { .detail-grid { grid-template-columns: 1fr; gap: 28px; } }
+</style>

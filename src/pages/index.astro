@@ -1,0 +1,123 @@
+---
+import Base from '@/layouts/Base.astro';
+import ResearchTimeline, { type ResearchItem } from '@/components/research/ResearchTimeline';
+import Archive, { type ArchivePaper } from '@/components/archive/Archive';
+import Filmstrip, { type FilmNote } from '@/components/film/Filmstrip';
+import {
+  getResearch,
+  getPublications,
+  getNotes,
+  getProfile,
+  responsive,
+  researchHref,
+  noteHref,
+  publicationHref,
+  formatDate,
+  isoDate,
+  pad2,
+} from '@/lib/content';
+
+const profile = await getProfile();
+const research = await getResearch();
+const publications = (await getPublications()).slice(0, 6);
+const notes = await getNotes();
+
+const researchSizes = '(max-width: 899px) 100vw, 72vw';
+
+const researchItems: ResearchItem[] = await Promise.all(
+  research.map(async (e) => ({
+    id: e.id,
+    year: e.data.year,
+    title: e.data.title,
+    caption: e.data.caption,
+    location: e.data.location,
+    href: researchHref(e),
+    alt: e.data.imageAlt,
+    demo: e.data.demo,
+    image: await responsive(e.data.image),
+  })),
+);
+
+const papers: ArchivePaper[] = publications.map((p, i) => ({
+  id: p.id,
+  number: pad2(i + 1),
+  title: p.data.title,
+  year: p.data.year,
+  venue: p.data.venue,
+  summary: p.data.summary,
+  href: publicationHref(p),
+  figureKind: p.data.figureKind,
+  demo: p.data.demo,
+}));
+
+const filmNotes: FilmNote[] = await Promise.all(
+  notes.map(async (n) => ({
+    id: n.id,
+    frame: n.data.frame,
+    title: n.data.title,
+    date: formatDate(n.data.date),
+    iso: isoDate(n.data.date),
+    location: n.data.location,
+    href: noteHref(n),
+    alt: n.data.coverAlt,
+    demo: n.data.demo,
+    image: await responsive(n.data.cover, [480, 720, 960]),
+  })),
+);
+
+const first = researchItems[0]?.image;
+---
+
+<Base preload={first ? { src: first.src, srcSet: first.srcSet, sizes: researchSizes } : undefined}>
+  <h1 class="sr-only">{profile.data.name} — {profile.data.role}</h1>
+
+  <!-- 01 — Research -->
+  <section id="research" class="room room--research" aria-labelledby="research-h" tabindex="-1">
+    <h2 id="research-h" class="sr-only">01 — Research</h2>
+    <ResearchTimeline client:load items={researchItems} sizes={researchSizes} />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 02 — Publications -->
+  <section id="publications" class="room room--publications wrap" aria-labelledby="publications-h" tabindex="-1">
+    <header class="room__head">
+      <h2 id="publications-h" class="label room__label">02 — Publications</h2>
+      <p class="meta room__intro">Selected papers &amp; ongoing questions</p>
+    </header>
+    <Archive client:visible papers={papers} indexHref="/publications/" />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 03 — Field Notes -->
+  <section id="field-notes" class="room room--notes" aria-labelledby="notes-h" tabindex="-1">
+    <header class="room__head wrap">
+      <h2 id="notes-h" class="label room__label">03 — Field Notes</h2>
+      <p class="meta room__intro">Fragments from life, and after the screening</p>
+    </header>
+    <Filmstrip client:idle notes={filmNotes} />
+    <p class="wrap room__more meta"><a class="link-underline" href="/notes/">All field notes ↗</a></p>
+  </section>
+</Base>
+
+<style>
+  .room { outline: none; }
+  .room--publications {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(48px, 8vh, 96px);
+    min-height: calc(100vh - var(--header-h));
+  }
+  .room--notes {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(64px, 12vh, 140px);
+  }
+  .room__head { margin-bottom: clamp(24px, 4vh, 40px); }
+  .room__label { margin: 0 0 6px; font-weight: 400; }
+  .room__intro { margin: 0; }
+  .room--notes .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
+  .room__more { margin-top: 28px; }
+  @media (min-width: 721px) {
+    .room__more { text-align: left; }
+  }
+</style>

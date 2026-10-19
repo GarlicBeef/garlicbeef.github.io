@@ -1,0 +1,62 @@
+---
+import '@/styles/global.css';
+import Header from '@/components/Header.astro';
+import { getProfile } from '@/lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Which header item is current on non-home pages. */
+  current?: 'research' | 'publications' | 'about' | 'notes';
+  /** Responsive image to preload (the first research photograph on the homepage). */
+  preload?: { srcSet: string; sizes: string; src: string };
+}
+
+const profile = await getProfile();
+const { title, description, current, preload } = Astro.props;
+const fullTitle = title ? `${title} — ${profile.data.name}` : `${profile.data.name} — ${profile.data.role}`;
+const desc =
+  description ??
+  `${profile.data.name}, ${profile.data.role.toLowerCase()}. Research, publications and field notes.`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={desc} />
+    <meta name="theme-color" content="#f8f8f5" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    {preload && (
+      <link rel="preload" as="image" href={preload.src} imagesrcset={preload.srcSet} imagesizes={preload.sizes} fetchpriority="high" />
+    )}
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer wrap">
+      <hr class="rule" />
+      <div class="site-footer__row meta">
+        <span>Research / Films / Everyday observations</span>
+        <span>© {new Date().getFullYear()} {profile.data.name}</span>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-footer { padding-top: 24px; padding-bottom: 40px; }
+  .site-footer__row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 18px;
+  }
+</style>

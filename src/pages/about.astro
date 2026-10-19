@@ -1,0 +1,45 @@
+---
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import { getProfile } from '@/lib/content';
+const profile = await getProfile();
+const { Content } = await render(profile);
+const d = profile.data;
+---
+
+<Base title="About" current="about">
+  <div class="page wrap about">
+    <header class="page-head">
+      <p class="label">About</p>
+      <h1 class="page-title">{d.name}</h1>
+    </header>
+    <div class="about-grid">
+      <dl class="dl">
+        <dt>Role</dt><dd>{d.role}</dd>
+        <dt>Field</dt><dd>{d.researchField ?? '— to be supplied'}</dd>
+        <dt>Affiliation</dt><dd>{d.affiliation ?? '— to be supplied'}</dd>
+        <dt>Links</dt>
+        <dd>
+          {d.links.length ? (
+            <ul class="links">{d.links.map((l) => <li><a class="link-underline" href={l.href}>{l.label}</a></li>)}</ul>
+          ) : '— to be supplied'}
+        </dd>
+      </dl>
+      <div>
+        <div class="prose"><Content /></div>
+        <p class="meta continue">
+          Continue to <a class="link-underline" href="/#research">Research</a>,
+          <a class="link-underline" href="/publications/">Publications</a> or
+          <a class="link-underline" href="/notes/">Field Notes</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .about-grid { display: grid; grid-template-columns: minmax(240px, 30%) 1fr; gap: 56px; }
+  .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .continue { margin-top: 40px; }
+  @media (max-width: 800px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } }
+</style>

@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import FadeContent from '@/components/reactbits/FadeContent';
+import { getNotes, noteHref, formatDate, isoDate } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const all = await getNotes();
+  return all.map((entry, i) => ({ params: { id: entry.id }, props: { entry, newer: all[i - 1], older: all[i + 1] } }));
+}
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+
+<Base title={d.title} current="notes">
+  <article class="page wrap note">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href="/#field-notes">03 — Field Notes</a> / Frame {d.frame}</p>
+      <h1 class="page-title">{d.title}</h1>
+      <p class="meta"><time datetime={isoDate(d.date)}>{formatDate(d.date)}</time>{d.location && ` / ${d.location}`}</p>
+    </header>
+    <FadeContent client:load effect="develop" duration={1.1} trigger="mount" className="note-photo">
+      <Image src={d.cover} alt={d.coverAlt} widths={[720, 1200, 1800]} sizes="(max-width: 900px) 100vw, 70vw" loading="eager" />
+    </FadeContent>
+    {d.demo && <p class="notice">Demonstration note — illustrative image and placeholder text.</p>}
+    <div class="prose"><Content /></div>
+    <nav class="pager" aria-label="More field notes">
+      {newer ? <a href={noteHref(newer)}>← {newer.data.title}</a> : <a href="/#field-notes">← Back to field notes</a>}
+      {older ? <a href={noteHref(older)}>{older.data.title} →</a> : <a href="/notes/">All field notes →</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  :global(.note-photo) { max-width: 1100px; margin-bottom: 36px; background: #1b1b1a; }
+  :global(.note-photo img) { width: 100%; height: auto; }
+</style>

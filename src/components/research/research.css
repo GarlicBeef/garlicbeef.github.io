@@ -1,0 +1,184 @@
+/* ---------- Research timeline ---------- */
+.rt {
+  --drum-h: clamp(300px, 46vh, 440px);
+  --R: calc(var(--drum-h) * 0.34);
+  --caption-h: 104px;
+  position: relative;
+}
+
+.rt__stage {
+  display: flex;
+  align-items: center;
+  padding-block: clamp(20px, 4vh, 48px) clamp(28px, 5vh, 56px);
+}
+
+.rt__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, 19%);
+  grid-template-areas:
+    'frame drum'
+    'caption aside';
+  column-gap: clamp(40px, 6vw, 120px);
+  align-items: center;
+  width: 100%;
+}
+.rt__frame { grid-area: frame; }
+.rt__caption-row { grid-area: caption; }
+.rt__drum { grid-area: drum; }
+.rt__aside { grid-area: aside; }
+
+.rt__frame {
+  position: relative;
+  /* Fit inside the viewport: never taller than the stage minus caption. */
+  width: min(100%, calc((100vh - var(--header-h) - var(--caption-h) - 110px) * 1.5));
+  background: #e8e8e3;
+  overflow: hidden;
+}
+
+.rt__photo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-photo) var(--ease);
+}
+.rt__photo.is-active { opacity: 1; pointer-events: auto; z-index: 1; }
+.rt__photo img { width: 100%; height: 100%; object-fit: cover; }
+.rt__photo:focus-visible { outline-offset: 6px; }
+
+.rt__caption-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 18px;
+  min-height: var(--caption-h);
+}
+
+.rt__captions { display: grid; min-width: 0; }
+.rt__caption {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 380ms var(--ease), visibility 0s linear 380ms;
+}
+.rt__caption.is-active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 380ms var(--ease) 120ms, visibility 0s;
+}
+.rt__section { margin: 0 0 8px; }
+.rt__title {
+  margin: 0 0 4px;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rt__caption .meta { margin: 0; white-space: pre-wrap; }
+
+.rt__step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.rt__step button {
+  background: none;
+  border: 0;
+  padding: 10px 2px;
+  cursor: pointer;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.rt__step button:disabled { color: var(--faint); cursor: default; }
+
+/* ---------- Year drum ---------- */
+.rt__drum {
+  position: relative;
+  width: 100%;
+  height: var(--drum-h);
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+
+/* An almost invisible glass drum: two soft edges and a hint of curvature. */
+.rt__glass {
+  position: absolute;
+  inset: 2% 4%;
+  border-radius: 46% / 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 10px 0 18px -16px rgba(0, 0, 0, 0.22),
+    inset -10px 0 18px -16px rgba(0, 0, 0, 0.22);
+  -webkit-mask-image: linear-gradient(180deg, transparent 4%, #000 30%, #000 70%, transparent 96%);
+  mask-image: linear-gradient(180deg, transparent 4%, #000 30%, #000 70%, transparent 96%);
+}
+
+.rt__year {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  margin: 0 auto;
+  width: max-content;
+  padding: 4px 10px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(40px, 4.2vw, 66px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--faint);
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+  transition: color var(--t-fast) var(--ease);
+}
+.rt__year.is-active { color: var(--ink); font-weight: 350; }
+.rt__year:hover { color: var(--ink-2); }
+.rt__year:focus-visible { outline-offset: 2px; }
+
+.rt__aside {
+  align-self: start;
+  justify-self: end;
+  margin: 18px 0 0;
+  text-align: right;
+}
+
+/* ---------- Scroll-linked mode (desktop, motion allowed) ---------- */
+@media (min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference) {
+  .rt { height: calc(100vh - var(--header-h) + var(--travel)); }
+  .rt__stage {
+    position: sticky;
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+  }
+}
+
+/* ---------- Stacked / static mode ---------- */
+@media (max-width: 899px) {
+  .rt { --drum-h: 190px; --R: 84px; --caption-h: auto; }
+  .rt__grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'frame' 'drum' 'caption';
+    row-gap: 4px;
+  }
+  .rt__frame { width: 100%; }
+  .rt__drum { height: var(--drum-h); width: min(240px, 70%); justify-self: center; }
+  .rt__year { font-size: 38px; }
+  .rt__aside { display: none; }
+  .rt__caption-row { flex-direction: column; gap: 12px; }
+}
+@media (min-width: 900px) and (prefers-reduced-motion: reduce),
+       (min-width: 900px) and (max-height: 559px) {
+  .rt__stage { min-height: calc(100vh - var(--header-h)); }
+}

@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import { getResearch, researchHref } from '@/lib/content';
+const all = await getResearch();
+---
+
+<Base title="Research" current="research">
+  <div class="page wrap">
+    <header class="page-head">
+      <p class="label">01 — Research</p>
+      <h1 class="page-title">All research projects</h1>
+    </header>
+    <ol class="r-list">
+      {all.map((e) => (
+        <li>
+          <a href={researchHref(e)} class="r-item">
+            <span class="r-year mono">{e.data.year}</span>
+            <Image src={e.data.image} alt="" widths={[320, 640]} sizes="240px" class="r-thumb" />
+            <span>
+              <span class="r-title">{e.data.title}</span>
+              <span class="meta r-cap">{e.data.caption}{e.data.demo ? ' · demo' : ''}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</Base>
+
+<style>
+  .r-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  .r-list li { border-bottom: 1px solid var(--rule); }
+  .r-item { display: grid; grid-template-columns: 80px 200px 1fr; gap: 28px; align-items: center; padding: 18px 0; }
+  .r-item:hover .r-title { text-decoration: underline; text-underline-offset: 3px; }
+  .r-year { font-size: 13px; }
+  :global(.r-thumb) { width: 200px; aspect-ratio: 3 / 2; object-fit: cover; }
+  .r-title { display: block; font-size: 16px; }
+  .r-cap { display: block; }
+  @media (max-width: 640px) {
+    .r-item { grid-template-columns: 1fr; gap: 10px; }
+    :global(.r-thumb) { width: 100%; }
+  }
+</style>

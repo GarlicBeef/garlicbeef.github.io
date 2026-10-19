@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import { getPublications, publicationHref, pad2 } from '@/lib/content';
+import { figureSvg } from '@/lib/figures';
+
+export async function getStaticPaths() {
+  const all = await getPublications();
+  return all.map((entry, i) => ({ params: { id: entry.id }, props: { entry, index: i, prev: all[i - 1], next: all[i + 1] } }));
+}
+const { entry, index, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const links = [
+  d.doi && { label: `DOI ${d.doi}`, href: `https://doi.org/${d.doi}` },
+  d.pdf && { label: 'PDF', href: d.pdf },
+  d.preprint && { label: 'Preprint', href: d.preprint },
+].filter(Boolean) as { label: string; href: string }[];
+---
+
+<Base title={d.title} current="publications" description={d.summary}>
+  <article class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href="/#publications">02 — Publications</a> / File {pad2(index + 1)}</p>
+      <h1 class="page-title">{d.title}</h1>
+      <p class="meta">{d.authors.join(', ')}</p>
+    </header>
+
+    <div class="pub-grid">
+      <div>
+        <dl class="dl">
+          <dt>Year</dt><dd>{d.year}</dd>
+          <dt>Venue</dt><dd>{d.venue}</dd>
+          <dt>Links</dt>
+          <dd>
+            {links.length ? links.map((l) => <a class="link-underline" href={l.href}>{l.label} ↗</a>) : <span class="muted">To be supplied</span>}
+          </dd>
+        </dl>
+        <p class="summary">{d.summary}</p>
+        {d.demo && <p class="notice">Demonstration entry — not a real publication.</p>}
+        <div class="prose"><Content /></div>
+      </div>
+      <figure class="pub-fig">
+        {d.figure ? (
+          <Image src={d.figure} alt={d.figureAlt ?? ''} widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 40vw" />
+        ) : (
+          <div class="pub-fig__svg" set:html={figureSvg(d.figureKind, index + 1)} />
+        )}
+        <figcaption class="meta">{d.figure ? d.figureAlt : 'Illustrative placeholder graphic — not research data.'}</figcaption>
+      </figure>
+    </div>
+
+    <nav class="pager" aria-label="More publications">
+      {prev ? <a href={publicationHref(prev)}>← {prev.data.title}</a> : <a href="/#publications">← Back to the archive</a>}
+      {next ? <a href={publicationHref(next)}>{next.data.title} →</a> : <a href="/publications/">Publication index →</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .pub-grid { display: grid; grid-template-columns: 1fr minmax(260px, 38%); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .summary { font-size: 17px; line-height: 1.55; max-width: 52ch; margin: 32px 0; }
+  .muted { color: var(--muted); }
+  .pub-fig { margin: 0; background: #efe9dc; padding: 28px; }
+  .pub-fig__svg :global(svg) { width: 100%; height: auto; display: block; }
+  .pub-fig figcaption { margin-top: 12px; }
+  @media (max-width: 900px) { .pub-grid { grid-template-columns: 1fr; } }
+</style>
