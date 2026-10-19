@@ -60,6 +60,7 @@ const filmNotes: FilmNote[] = await Promise.all(
     location: n.data.location,
     href: noteHref(n),
     alt: n.data.coverAlt,
+    position: n.data.coverPosition,
     demo: n.data.demo,
     image: await responsive(n.data.cover, [480, 720, 960]),
   })),

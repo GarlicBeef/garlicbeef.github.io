@@ -59,6 +59,8 @@ const notes = defineCollection({
       location: z.string().optional(),
       cover: image(),
       coverAlt: z.string(),
+      /** Focal point used when the photo is cropped (CSS object-position), e.g. "50% 30%". */
+      coverPosition: z.string().default('50% 50%'),
       /** Frame number printed on the filmstrip — the explicit frame → note mapping. */
       frame: z.number().int(),
       /** Optional override; defaults to /notes/<id>/ */

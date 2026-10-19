@@ -15,7 +15,7 @@ const all = await getNotes();
       {all.map((n) => (
         <li>
           <a href={noteHref(n)} class="n-card">
-            <Image src={n.data.cover} alt={n.data.coverAlt} widths={[480, 800]} sizes="(max-width: 640px) 100vw, 33vw" class="n-img" />
+            <Image src={n.data.cover} alt={n.data.coverAlt} widths={[480, 800]} sizes="(max-width: 640px) 100vw, 33vw" class="n-img" style={`object-position: ${n.data.coverPosition}`} />
             <span class="n-title">{n.data.title}</span>
             <span class="meta">{formatDate(n.data.date)}{n.data.location && ` / ${n.data.location}`}</span>
           </a>
@@ -28,7 +28,7 @@ const all = await getNotes();
 <style>
   .n-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 48px 32px; }
   .n-card { display: grid; gap: 4px; }
-  :global(.n-img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; margin-bottom: 10px; filter: grayscale(1); transition: filter var(--t-photo) var(--ease); }
+  :global(.n-img) { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; margin-bottom: 10px; filter: grayscale(1); transition: filter var(--t-photo) var(--ease); }
   .n-card:hover :global(.n-img), .n-card:focus-visible :global(.n-img) { filter: none; }
   .n-title { font-size: 15px; }
 </style>

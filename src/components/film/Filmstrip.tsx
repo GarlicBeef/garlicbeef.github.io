@@ -12,6 +12,7 @@ export interface FilmNote {
   location?: string;
   href: string;
   alt: string;
+  position: string;
   demo: boolean;
   image: { src: string; srcSet: string; width: number; height: number };
 }
@@ -56,8 +57,8 @@ function Frame({
       >
         <span className="fs__film">
           <span className="fs__edge fs__edge--top mono" aria-hidden="true">
-            <span>{note.frame}</span>
-            <span className="fs__edge-mark">▸ {note.frame}A</span>
+            <span>{String(note.frame).padStart(2, '0')}</span>
+            <span className="fs__edge-mark">▸ {String(note.frame).padStart(2, '0')}A</span>
           </span>
           <span className="fs__img">
             {missing ? (
@@ -73,13 +74,14 @@ function Frame({
                 loading="lazy"
                 decoding="async"
                 draggable={false}
+                style={{ objectPosition: note.position }}
                 onError={() => onMissing(note.id)}
               />
             )}
           </span>
           <span className="fs__edge fs__edge--bottom mono" aria-hidden="true">
-            <span>{note.frame}</span>
-            <span className="fs__edge-mark">{note.frame}A ◂</span>
+            <span>{String(note.frame).padStart(2, '0')}</span>
+            <span className="fs__edge-mark">{String(note.frame).padStart(2, '0')}A ◂</span>
           </span>
         </span>
         <span className="fs__inline-caption meta" aria-hidden="true">
