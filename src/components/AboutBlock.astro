@@ -1,0 +1,74 @@
+---
+/**
+ * The About content, shared by the homepage section (03 — About) and the /about/ page
+ * so both always look the same: the FluidGlass name panel, then details and biography.
+ */
+import { render } from 'astro:content';
+import FluidGlass from '@/components/reactbits/FluidGlass';
+import { getProfile } from '@/lib/content';
+
+const profile = await getProfile();
+const { Content } = await render(profile);
+const d = profile.data;
+---
+
+<div class="about-glass">
+  <FluidGlass
+    client:visible
+    text={"Quantum Optics"}
+    background="#f8f8f5"
+    shape="torus"
+    size={260}
+    refraction={1}
+    dispersion={0.35}
+    interaction="follow"
+    frost={0}
+    color="#ffffff"
+    tint={0}
+    reflection={1}
+    shadow={0.5}
+    elevation={0.4}
+    smoothness={0.5}
+    wobble={0.5}
+    spin={0.3}
+    idle
+    morphOnClick
+    intro
+  />
+</div>
+<div class="about-grid">
+  <dl class="dl">
+    <dt>Role</dt><dd>PostDoc at Max Planc Institute of Quantum Optics</dd>
+    <dt>Field</dt><dd>{d.researchField ?? '— to be supplied'}</dd>
+    <dt>Affiliation</dt><dd>{d.affiliation ?? '— to be supplied'}</dd>
+    <dt>Google Scholar</dt>
+    <dd>
+      {d.links.length ? (
+        <ul class="links">{d.links.map((l) => <li><a class="link-underline" href={l.href}>{l.label}</a></li>)}</ul>
+      ) : '— to be supplied'}
+    </dd>
+    <dt>CV</dt><dd>{d.affiliation ?? '— to be supplied'}</dd>
+  </dl>
+  <div>
+    <div class="prose"><Content /></div>
+    <p class="meta continue">
+      Continue to <a class="link-underline" href="/#research">Research</a>,
+      <a class="link-underline" href="/publications/">Publications</a> or
+      <a class="link-underline" href="/notes/">Field Notes</a>.
+    </p>
+  </div>
+</div>
+
+<style>
+  .about-glass {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    margin-bottom: clamp(40px, 7vh, 72px);
+  }
+  @media (max-width: 720px) { .about-glass { height: 420px; } }
+  .about-grid { display: grid; grid-template-columns: minmax(240px, 30%) 1fr; gap: 56px; align-items: start; }
+  .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .continue { margin-top: 40px; }
+  @media (max-width: 800px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } }
+</style>

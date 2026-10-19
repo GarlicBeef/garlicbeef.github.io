@@ -12,7 +12,7 @@ const identity = [role, researchField, affiliation].filter(Boolean).join(' · ')
 const items = [
   { key: 'research', label: 'Research', href: '/#research' },
   { key: 'publications', label: 'Publications', href: '/#publications' },
-  { key: 'about', label: 'About', href: '/about/' },
+  { key: 'about', label: 'About', href: '/#about' },
   { key: 'notes', label: 'Field Notes', href: '/#field-notes' },
 ] as const;
 ---
@@ -111,12 +111,12 @@ const items = [
   window.addEventListener('scroll', onScroll, { passive: true });
 
   // On the homepage, mark the section currently in view.
-  const sections = ['research', 'publications', 'field-notes']
+  const sections = ['research', 'publications', 'about', 'field-notes']
     .map((id) => document.getElementById(id))
     .filter((el): el is HTMLElement => !!el);
   if (sections.length) {
     const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
-    const keyFor: Record<string, string> = { research: 'research', publications: 'publications', 'field-notes': 'notes' };
+    const keyFor: Record<string, string> = { research: 'research', publications: 'publications', about: 'about', 'field-notes': 'notes' };
     const update = () => {
       const probe = window.innerHeight * 0.35;
       let active = '';
@@ -135,15 +135,52 @@ const items = [
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
 
-    // Same-page jumps: always instant, so Publications / Field Notes bypass the research timeline.
+    // Same-page navigation: a short, eased scroll to the section. Long trips first jump to
+    // just short of the destination, so the research timeline is never played through.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let raf = 0;
+    const cancel = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    ['wheel', 'touchstart', 'keydown'].forEach((t) => window.addEventListener(t, cancel, { passive: true }));
+
+    const scrollToY = (to: number) => {
+      cancel();
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      to = Math.max(0, Math.min(max, to));
+      if (reduce.matches) {
+        window.scrollTo({ top: to, behavior: 'instant' as ScrollBehavior });
+        return;
+      }
+      const vh = window.innerHeight;
+      const lead = vh * 0.6;
+      let from = window.scrollY;
+      if (Math.abs(to - from) > lead) {
+        from = to + (to > from ? -lead : lead);
+        window.scrollTo({ top: from, behavior: 'instant' as ScrollBehavior });
+      }
+      const dist = to - from;
+      const dur = 700;
+      const t0 = performance.now();
+      const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const step = (now: number) => {
+        const t = Math.min(1, (now - t0) / dur);
+        window.scrollTo({ top: from + dist * ease(t), behavior: 'instant' as ScrollBehavior });
+        raf = t < 1 ? requestAnimationFrame(step) : 0;
+      };
+      raf = requestAnimationFrame(step);
+    };
+
     links.forEach((a) => {
       a.addEventListener('click', (e) => {
-        const hash = new URL(a.href).hash.slice(1);
+        const url = new URL(a.href);
+        const hash = url.hash.slice(1);
         const target = hash && document.getElementById(hash);
-        if (!target || new URL(a.href).pathname !== location.pathname) return;
+        if (!target || url.pathname !== location.pathname) return;
         e.preventDefault();
         const top = target.getBoundingClientRect().top + window.scrollY - (header?.offsetHeight ?? 0);
-        window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+        scrollToY(top);
         history.pushState(null, '', `#${hash}`);
         target.focus({ preventScroll: true });
       });

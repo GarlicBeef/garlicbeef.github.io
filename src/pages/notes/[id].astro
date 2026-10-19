@@ -17,7 +17,7 @@ const d = entry.data;
 <Base title={d.title} current="notes">
   <article class="page wrap note">
     <header class="page-head">
-      <p class="label"><a class="link-underline" href="/#field-notes">03 — Field Notes</a> / Frame {String(d.frame).padStart(2, '0')}</p>
+      <p class="label"><a class="link-underline" href="/#field-notes">04 — Field Notes</a> / Frame {String(d.frame).padStart(2, '0')}</p>
       <h1 class="page-title">{d.title}</h1>
       <p class="meta"><time datetime={isoDate(d.date)}>{formatDate(d.date)}</time>{d.location && ` / ${d.location}`}</p>
     </header>

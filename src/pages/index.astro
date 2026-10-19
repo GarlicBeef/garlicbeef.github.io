@@ -1,5 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
+import AboutBlock from '@/components/AboutBlock.astro';
 import { getImage } from 'astro:assets';
 import ResearchTimeline, { type ResearchItem } from '@/components/research/ResearchTimeline';
 import Archive, { type ArchivePaper } from '@/components/archive/Archive';
@@ -93,10 +94,21 @@ const first = researchItems[0]?.image;
 
   <div class="wrap"><hr class="rule" /></div>
 
-  <!-- 03 — Field Notes -->
+  <!-- 03 — About -->
+  <section id="about" class="room room--about wrap" aria-labelledby="about-h" tabindex="-1">
+    <header class="room__head">
+      <h2 id="about-h" class="label room__label">03 — About</h2>
+      <p class="meta room__intro">Background, and where the work happens</p>
+    </header>
+    <AboutBlock />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 04 — Field Notes -->
   <section id="field-notes" class="room room--notes" aria-labelledby="notes-h" tabindex="-1">
     <header class="room__head wrap">
-      <h2 id="notes-h" class="label room__label">03 — Field Notes</h2>
+      <h2 id="notes-h" class="label room__label">04 — Field Notes</h2>
       <p class="meta room__intro">Fragments from life, and after the screening</p>
     </header>
     <Filmstrip client:idle notes={filmNotes} />
@@ -116,6 +128,12 @@ const first = researchItems[0]?.image;
     padding-bottom: clamp(64px, 12vh, 140px);
   }
   .room__head { margin-bottom: clamp(24px, 4vh, 40px); }
+  .room--about {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(56px, 10vh, 120px);
+  }
+  .room--about .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
+
   .room__label { margin: 0 0 6px; font-weight: 400; }
   .room__intro { margin: 0; }
   .room--notes .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
