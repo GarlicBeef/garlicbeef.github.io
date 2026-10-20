@@ -3,8 +3,7 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 
 export default defineConfig({
-  // Replace with the real domain before deploying.
-  site: 'https://example.org',
+  site: 'https://garlicbeef.github.io',
   integrations: [react()],
   devToolbar: { enabled: false },
   vite: {
