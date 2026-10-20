@@ -36,6 +36,7 @@ const researchItems: ResearchItem[] = await Promise.all(
     href: researchHref(e),
     alt: e.data.imageAlt,
     demo: e.data.demo,
+    fit: e.data.imageFit,
     image: await responsive(e.data.image),
   })),
 );

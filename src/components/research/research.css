@@ -8,20 +8,16 @@
 .rt__stage {
   display: flex;
   align-items: center;
-  padding-block: clamp(32px, 7vh, 88px) clamp(40px, 8vh, 96px);
+  padding-block: clamp(20px, 4vh, 48px) clamp(28px, 5vh, 56px);
 }
 
 .rt__grid {
   display: grid;
-  /* Photo width: never taller than the stage allows, and well short of the full width. */
-  --frame-w: min(56vw, calc((100vh - var(--header-h) - var(--caption-h) - 220px) * 1.5));
-  /* Photo + caption and the year wheel sit together as one centred group. */
-  grid-template-columns: var(--frame-w) clamp(200px, 17vw, 300px);
-  justify-content: center;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, 19%);
   grid-template-areas:
     'frame drum'
     'caption aside';
-  column-gap: clamp(40px, 5vw, 96px);
+  column-gap: clamp(40px, 6vw, 120px);
   align-items: center;
   width: 100%;
 }
@@ -32,7 +28,8 @@
 
 .rt__frame {
   position: relative;
-  width: 100%;
+  /* Fit inside the viewport: never taller than the stage minus caption. */
+  width: min(100%, calc((100vh - var(--header-h) - var(--caption-h) - 110px) * 1.5));
   background: #e8e8e3;
   overflow: hidden;
   /* Mounted-print border: a narrow white mat with a hairline outer edge. */
@@ -52,6 +49,9 @@
 }
 .rt__photo.is-active { opacity: 1; pointer-events: auto; z-index: 1; }
 .rt__photo img { width: 100%; height: 100%; object-fit: cover; }
+/* Wide figures are shown whole on a white ground instead of being cropped. */
+.rt__photo--contain { background: #fff; }
+.rt__photo--contain img { object-fit: contain; padding: 4%; }
 .rt__photo:focus-visible { outline-offset: 6px; }
 
 .rt__caption-row {

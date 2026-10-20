@@ -23,6 +23,8 @@ const research = defineCollection({
       location: z.string().optional(),
       /** Optional override; defaults to /research/<id>/ */
       destination: z.string().optional(),
+      /** 'contain' shows the whole image (e.g. a wide figure) instead of cropping it to the frame. */
+      imageFit: z.enum(['cover', 'contain']).default('cover'),
       demo: z.boolean().default(false),
     }),
 });

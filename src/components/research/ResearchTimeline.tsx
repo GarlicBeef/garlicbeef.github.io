@@ -13,6 +13,7 @@ export interface ResearchItem {
   href: string;
   alt: string;
   demo: boolean;
+  fit?: 'cover' | 'contain';
   image: { src: string; srcSet: string; width: number; height: number };
 }
 
@@ -164,7 +165,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
                 <a
                   key={item.id}
                   href={item.href}
-                  className={`rt__photo${i === active ? ' is-active' : ''}`}
+                  className={`rt__photo${i === active ? ' is-active' : ''}${item.fit === 'contain' ? ' rt__photo--contain' : ''}`}
                   aria-hidden={i !== active}
                   tabIndex={i === active ? 0 : -1}
                   aria-label={`${item.title}, ${item.year} — open project`}

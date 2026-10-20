@@ -41,7 +41,7 @@ const d = entry.data;
 
     <nav class="pager" aria-label="More research">
       {newer ? <a href={researchHref(newer)}>← {newer.data.year} · {newer.data.title}</a> : <a href="/#research">← Back to research</a>}
-      {older ? <a href={researchHref(older)}>{older.data.year} · {older.data.title} →</a> : <a href="/research/">All research →</a>}
+      {older ? <a href={researchHref(older)}>{older.data.year} · {older.data.title} →</a> : <a href="/#research">Back to research →</a>}
     </nav>
   </article>
 </Base>
