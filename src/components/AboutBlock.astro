@@ -11,16 +11,25 @@ const profile = await getProfile();
 const { Content } = await render(profile);
 const d = profile.data;
 
-/** Research themes arranged around "Quantum Optics" in the glass panel (x, y: centre as fractions of the panel). */
+/**
+ * Research themes arranged in an oval around "Quantum Optics" in the glass panel.
+ * x, y: centre of each word as fractions of the panel; size: relative to "Quantum Optics".
+ * Rows get narrower towards the top and bottom so the cloud's outline reads as an oval.
+ * Colours group the themes: atoms & arrays (#017288), molecules (amber), field (sage).
+ * Colours are softened and partly transparent so the glass reads through them.
+ */
+const ATOMS = '#017288';
+const MOLECULES = '#c08a62';
+const FIELD = '#6f8f7d';
 const cloud = [
-  { text: 'AMO Physics', x: 0.24, y: 0.17, size: 0.42, weight: 500, opacity: 0.92 },
-  { text: 'Ultracold Polar Molecules', x: 0.67, y: 0.14, size: 0.26, weight: 400, opacity: 0.72 },
-  { text: 'Optical tweezers', x: 0.21, y: 0.31, size: 0.2, weight: 300, opacity: 0.55 },
-  { text: 'Atom Arrays', x: 0.79, y: 0.3, size: 0.3, weight: 500, opacity: 0.8 },
-  { text: 'Rydberg Atom Quantum Simulation', x: 0.33, y: 0.71, size: 0.24, weight: 400, opacity: 0.7 },
-  { text: 'Neutral-atom Quantum Computing', x: 0.77, y: 0.74, size: 0.2, weight: 300, opacity: 0.55 },
-  { text: 'Microwave Shielding', x: 0.56, y: 0.87, size: 0.34, weight: 500, opacity: 0.85 },
-  { text: 'Dipolar Fermi Gases', x: 0.16, y: 0.88, size: 0.22, weight: 400, opacity: 0.65 },
+  { text: 'Atom Arrays', x: 0.5, y: 0.15, size: 0.3, weight: 500, color: ATOMS, opacity: 0.53 },
+  { text: 'AMO Physics', x: 0.37, y: 0.245, size: 0.4, weight: 600, color: FIELD, opacity: 0.72, stroke: 2 },
+  { text: 'Optical tweezers', x: 0.655, y: 0.25, size: 0.22, weight: 400, color: ATOMS, opacity: 0.5 },
+  { text: 'Ultracold Polar Molecules', x: 0.5, y: 0.335, size: 0.26, weight: 500, color: MOLECULES, opacity: 0.68 },
+  { text: 'Rydberg Atom Quantum Simulation', x: 0.5, y: 0.675, size: 0.25, weight: 500, color: ATOMS, opacity: 0.6 },
+  { text: 'Microwave Shielding', x: 0.385, y: 0.765, size: 0.34, weight: 600, color: MOLECULES, opacity: 0.9, stroke: 1.5 },
+  { text: 'Dipolar Fermi Gases', x: 0.705, y: 0.76, size: 0.21, weight: 400, color: MOLECULES, opacity: 0.55 },
+  { text: 'Neutral-atom Quantum Computing', x: 0.5, y: 0.85, size: 0.2, weight: 400, color: ATOMS, opacity: 0.48 },
 ];
 ---
 
@@ -29,6 +38,7 @@ const cloud = [
     client:visible
     text={"Quantum Optics"}
     cloud={cloud}
+    textStroke={2}
     background="#f8f8f5"
     shape="torus"
     size={260}
@@ -76,10 +86,10 @@ const cloud = [
   .about-glass {
     position: relative;
     width: 100%;
-    height: 600px;
+    /* Scales with the width so the word cloud keeps its oval proportions. */
+    height: clamp(320px, 43vw, 600px);
     margin-bottom: clamp(40px, 7vh, 72px);
   }
-  @media (max-width: 720px) { .about-glass { height: 420px; } }
   .about-grid { display: grid; grid-template-columns: minmax(240px, 30%) 1fr; gap: 56px; align-items: start; }
   .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .continue { margin-top: 40px; }

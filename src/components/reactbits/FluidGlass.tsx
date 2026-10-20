@@ -14,6 +14,10 @@ export interface CloudWord {
   weight?: number | string;
   /** 0–1, applied on top of the text colour. */
   opacity?: number;
+  /** Word colour; defaults to the text colour. */
+  color?: string; // ADDED
+  /** Draw this word as an outline of this width (px) instead of filled. */
+  stroke?: number; // ADDED
   /** Degrees. */
   rotate?: number;
 }
@@ -57,11 +61,14 @@ export interface FluidGlassProps {
   children?: ReactNode;
   /** ADDED (local): extra words arranged around the main text. */
   cloud?: CloudWord[];
+  /** ADDED (local): draw the main text as an outline of this width (px) instead of filled. */
+  textStroke?: number;
 }
 
 interface Settings {
   text: string;
   cloud: CloudWord[];
+  textStroke: number;
   textColor?: string;
   fontFamily?: string;
   fontWeight: number | string;
@@ -685,7 +692,8 @@ const FluidGlass = ({
   className = '',
   style,
   children,
-  cloud = []
+  cloud = [],
+  textStroke = 0
 }: FluidGlassProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -697,6 +705,7 @@ const FluidGlass = ({
   const settings: Settings = {
     text: String(text ?? ''),
     cloud,
+    textStroke: Math.max(0, textStroke),
     textColor,
     fontFamily,
     fontWeight,
@@ -889,7 +898,7 @@ const FluidGlass = ({
       const fill = s.textColor || computed.color || '#ffffff';
       const width = canvas.width;
       const height = canvas.height;
-      const key = [s.text, JSON.stringify(s.cloud), family, fill, s.fontWeight, s.fontSize, width, height].join('|');
+      const key = [s.text, JSON.stringify(s.cloud), s.textStroke, family, fill, s.fontWeight, s.fontSize, width, height].join('|');
       if (key === textState.key) return;
       textState.key = key;
       textCanvas.width = width;
@@ -917,8 +926,14 @@ const FluidGlass = ({
         const lineHeight = px * 1.02;
         const total = lineHeight * (lines.length - 1) + ascent + descent;
         let y = (height - total) / 2 + ascent;
+        if (s.textStroke) {
+          ctx.strokeStyle = fill;
+          ctx.lineWidth = s.textStroke * ratio;
+          ctx.lineJoin = 'round';
+        }
         lines.forEach(line => {
-          ctx.fillText(line, width / 2, y);
+          if (s.textStroke) ctx.strokeText(line, width / 2, y);
+          else ctx.fillText(line, width / 2, y);
           y += lineHeight;
         });
         // ADDED (local): word cloud around the main text, sized relative to it.
@@ -936,9 +951,17 @@ const FluidGlass = ({
           }
           if ('letterSpacing' in ctx) ctx.letterSpacing = `${-0.015 * wpx}px`;
           ctx.globalAlpha = w.opacity ?? 1;
+          ctx.fillStyle = w.color ?? fill;
           ctx.translate(w.x * width, w.y * height);
           if (w.rotate) ctx.rotate((w.rotate * Math.PI) / 180);
-          ctx.fillText(w.text, 0, 0);
+          if (w.stroke) {
+            ctx.strokeStyle = w.color ?? fill;
+            ctx.lineWidth = w.stroke * ratio;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(w.text, 0, 0);
+          } else {
+            ctx.fillText(w.text, 0, 0);
+          }
           ctx.restore();
         }
       }
