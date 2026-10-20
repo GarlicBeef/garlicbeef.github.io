@@ -8,16 +8,20 @@
 .rt__stage {
   display: flex;
   align-items: center;
-  padding-block: clamp(20px, 4vh, 48px) clamp(28px, 5vh, 56px);
+  padding-block: clamp(32px, 7vh, 88px) clamp(40px, 8vh, 96px);
 }
 
 .rt__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(170px, 19%);
+  /* Photo width: never taller than the stage allows, and well short of the full width. */
+  --frame-w: min(56vw, calc((100vh - var(--header-h) - var(--caption-h) - 220px) * 1.5));
+  /* Photo + caption and the year wheel sit together as one centred group. */
+  grid-template-columns: var(--frame-w) clamp(200px, 17vw, 300px);
+  justify-content: center;
   grid-template-areas:
     'frame drum'
     'caption aside';
-  column-gap: clamp(40px, 6vw, 120px);
+  column-gap: clamp(40px, 5vw, 96px);
   align-items: center;
   width: 100%;
 }
@@ -28,10 +32,15 @@
 
 .rt__frame {
   position: relative;
-  /* Fit inside the viewport: never taller than the stage minus caption. */
-  width: min(100%, calc((100vh - var(--header-h) - var(--caption-h) - 110px) * 1.5));
+  width: 100%;
   background: #e8e8e3;
   overflow: hidden;
+  /* Mounted-print border: a narrow white mat with a hairline outer edge. */
+  --mat: clamp(8px, 0.9vw, 14px);
+  border: var(--mat) solid #fff;
+  /* Outer radius = mat + inner radius, so the mat and the photo corners stay concentric. */
+  border-radius: calc(var(--mat) + 6px);
+  box-shadow: 0 0 0 1px rgba(22, 22, 21, 0.18), 0 10px 30px -18px rgba(22, 22, 21, 0.35);
 }
 
 .rt__photo {
