@@ -1,0 +1,149 @@
+---
+/** Homepage, shared by / and /zh/ — the language comes from the URL. */
+import Base from '@/layouts/Base.astro';
+import AboutBlock from '@/components/AboutBlock.astro';
+import { getImage } from 'astro:assets';
+import ResearchTimeline, { type ResearchItem } from '@/components/research/ResearchTimeline';
+import Archive, { type ArchivePaper } from '@/components/archive/Archive';
+import Filmstrip, { type FilmNote } from '@/components/film/Filmstrip';
+import {
+  getResearch,
+  getPublications,
+  getNotes,
+  getProfile,
+  responsive,
+  researchHref,
+  noteHref,
+  publicationHref,
+  formatDate,
+  isoDate,
+  pad2,
+} from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const profile = await getProfile();
+const research = await getResearch();
+const publications = (await getPublications()).slice(0, 6);
+const notes = await getNotes();
+
+const researchSizes = '(max-width: 899px) 100vw, 72vw';
+
+const researchItems: ResearchItem[] = await Promise.all(
+  research.map(async (e) => ({
+    id: e.id,
+    year: e.data.year,
+    title: pick(e.data, 'title', lang),
+    caption: pick(e.data, 'caption', lang),
+    location: pick(e.data, 'location', lang),
+    href: researchHref(e, lang),
+    alt: pick(e.data, 'imageAlt', lang),
+    demo: e.data.demo,
+    fit: e.data.imageFit,
+    image: await responsive(e.data.image),
+  })),
+);
+
+const papers: ArchivePaper[] = await Promise.all(publications.map(async (p, i) => ({
+  id: p.id,
+  number: pad2(i + 1),
+  title: pick(p.data, 'title', lang),
+  year: p.data.year,
+  venue: pick(p.data, 'venue', lang),
+  summary: pick(p.data, 'summary', lang),
+  href: publicationHref(p, lang),
+  figureKind: p.data.figureKind,
+  figureSrc: p.data.figure ? (await getImage({ src: p.data.figure, width: Math.min(1200, p.data.figure.width), format: 'webp', quality: 85 })).src : undefined,
+  demo: p.data.demo,
+})));
+
+const filmNotes: FilmNote[] = await Promise.all(
+  notes.map(async (n) => ({
+    id: n.id,
+    frame: n.data.frame,
+    title: pick(n.data, 'title', lang),
+    date: formatDate(n.data.date, lang),
+    iso: isoDate(n.data.date),
+    location: pick(n.data, 'location', lang),
+    href: noteHref(n, lang),
+    alt: pick(n.data, 'coverAlt', lang),
+    position: n.data.coverPosition,
+    demo: n.data.demo,
+    image: await responsive(n.data.cover, [480, 720, 960]),
+  })),
+);
+
+const first = researchItems[0]?.image;
+---
+
+<Base preload={first ? { src: first.src, srcSet: first.srcSet, sizes: researchSizes } : undefined}>
+  <h1 class="sr-only">{pick(profile.data, 'name', lang)} — {pick(profile.data, 'role', lang)}</h1>
+
+  <!-- 01 — Research -->
+  <section id="research" class="room room--research" aria-labelledby="research-h" tabindex="-1">
+    <h2 id="research-h" class="sr-only">{t.sections.research}</h2>
+    <ResearchTimeline client:load items={researchItems} sizes={researchSizes} lang={lang} />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 02 — Publications -->
+  <section id="publications" class="room room--publications wrap" aria-labelledby="publications-h" tabindex="-1">
+    <header class="room__head">
+      <h2 id="publications-h" class="label room__label">{t.sections.publications}</h2>
+      <p class="meta room__intro">{t.intros.publications}</p>
+    </header>
+    <Archive client:visible papers={papers} indexHref={localePath(lang, '/publications/')} lang={lang} />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 03 — About -->
+  <section id="about" class="room room--about wrap" aria-labelledby="about-h" tabindex="-1">
+    <header class="room__head">
+      <h2 id="about-h" class="label room__label">{t.sections.about}</h2>
+      <p class="meta room__intro">{t.intros.about}</p>
+    </header>
+    <AboutBlock />
+  </section>
+
+  <div class="wrap"><hr class="rule" /></div>
+
+  <!-- 04 — Field Notes -->
+  <section id="field-notes" class="room room--notes" aria-labelledby="notes-h" tabindex="-1">
+    <header class="room__head wrap">
+      <h2 id="notes-h" class="label room__label">{t.sections.notes}</h2>
+      <p class="meta room__intro">{t.intros.notes}</p>
+    </header>
+    <Filmstrip client:idle notes={filmNotes} lang={lang} />
+    <p class="wrap room__more meta"><a class="link-underline" href={localePath(lang, '/notes/')}>{t.notes.allLink}</a></p>
+  </section>
+</Base>
+
+<style>
+  .room { outline: none; }
+  .room--publications {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(48px, 8vh, 96px);
+    min-height: calc(100vh - var(--header-h));
+  }
+  .room--notes {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(64px, 12vh, 140px);
+  }
+  .room__head { margin-bottom: clamp(24px, 4vh, 40px); }
+  .room--about {
+    padding-top: clamp(40px, 7vh, 72px);
+    padding-bottom: clamp(56px, 10vh, 120px);
+  }
+  .room--about .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
+
+  .room__label { margin: 0 0 6px; font-weight: 400; }
+  .room__intro { margin: 0; }
+  .room--notes .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
+  .room__more { margin-top: 28px; }
+  @media (min-width: 721px) {
+    .room__more { text-align: left; }
+  }
+</style>

@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import Header from '@/components/Header.astro';
 import { getProfile } from '@/lib/content';
+import { t as tr, langFromUrl, alternatePath, pick, locales, localePath } from '@/i18n/ui';
 
 interface Props {
   title?: string;
@@ -16,14 +17,18 @@ interface Props {
 
 const profile = await getProfile();
 const { title, description, current, preload, footer = true } = Astro.props;
-const fullTitle = title ? `${title} — ${profile.data.name}` : `${profile.data.name} — ${profile.data.role}`;
-const desc =
-  description ??
-  `${profile.data.name}, ${profile.data.role.toLowerCase()}. Research, publications and field notes.`;
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const name = pick(profile.data, 'name', lang);
+const role = pick(profile.data, 'role', lang);
+const fullTitle = title ? `${title} — ${name}` : `${name} — ${role}`;
+const desc = description ?? (lang === 'zh' ? `${name}，${role}。${t.about.descSuffix}` : `${name}, ${role.toLowerCase()}. ${t.about.descSuffix}`);
+const alt = alternatePath(lang, Astro.url.pathname);
+const enPath = lang === 'en' ? Astro.url.pathname : alt.href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={t.htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,13 +36,16 @@ const desc =
     <meta name="theme-color" content="#f8f8f5" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    {locales.map((l) => (
+      <link rel="alternate" hreflang={l === 'zh' ? 'zh-CN' : 'en'} href={new URL(localePath(l, enPath), Astro.site)} />
+    ))}
     {preload && (
       <link rel="preload" as="image" href={preload.src} imagesrcset={preload.srcSet} imagesizes={preload.sizes} fetchpriority="high" />
     )}
     <title>{fullTitle}</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{t.skip}</a>
     <Header current={current} />
     <main id="main">
       <slot />
@@ -46,8 +54,8 @@ const desc =
       <footer class="site-footer wrap">
         <hr class="rule" />
         <div class="site-footer__row meta">
-          <span>Research / Films / Everyday observations</span>
-          <span>© {new Date().getFullYear()} {profile.data.name}</span>
+          <span>{t.footer}</span>
+          <span>© {new Date().getFullYear()} {name}</span>
         </div>
       </footer>
     )}

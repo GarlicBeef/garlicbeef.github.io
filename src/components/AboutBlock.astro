@@ -5,11 +5,18 @@
  */
 import { render } from 'astro:content';
 import FluidGlass from '@/components/reactbits/FluidGlass';
-import { getProfile } from '@/lib/content';
+import { getProfile, paragraphs, inlineMd } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
 
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
 const profile = await getProfile();
 const { Content } = await render(profile);
 const d = profile.data;
+const zhBio = lang === 'zh' ? paragraphs(d.zh?.body) : [];
+const role = lang === 'zh' ? '马克斯·普朗克量子光学研究所 博士后' : 'PostDoc at Max Planc Institute of Quantum Optics';
+const field = pick(d, 'researchField', lang) ?? t.about.toBeSupplied;
+const affiliation = pick(d, 'affiliation', lang) ?? t.about.toBeSupplied;
 
 /**
  * Research themes arranged in an oval around "Quantum Optics" in the glass panel.
@@ -31,13 +38,27 @@ const cloud = [
   { text: 'Dipolar Fermi Gases', x: 0.705, y: 0.76, size: 0.21, weight: 400, color: FIELD, opacity: 0.55 },
   { text: 'Neutral-atom Quantum Computing', x: 0.5, y: 0.85, size: 0.2, weight: 400, color: ATOMS, opacity: 0.48 },
 ];
+
+/** Chinese cloud: same oval, sizes nudged for the denser CJK glyphs. */
+const cloudZh = [
+  { text: '原子阵列', x: 0.5, y: 0.15, size: 0.3, weight: 500, color: ATOMS, opacity: 0.62 },
+  { text: 'AMO 物理', x: 0.38, y: 0.245, size: 0.38, weight: 600, color: FIELD, opacity: 0.72 },
+  { text: '光镊', x: 0.635, y: 0.25, size: 0.26, weight: 400, color: ATOMS, opacity: 0.5 },
+  { text: '超冷极性分子', x: 0.5, y: 0.335, size: 0.26, weight: 500, color: MOLECULES, opacity: 0.68 },
+  { text: '里德堡原子量子模拟', x: 0.5, y: 0.675, size: 0.25, weight: 500, color: ATOMS, opacity: 0.6 },
+  { text: '微波屏蔽', x: 0.4, y: 0.765, size: 0.34, weight: 600, color: MOLECULES, opacity: 0.9, stroke: 1.2 },
+  { text: '偶极费米气体', x: 0.66, y: 0.76, size: 0.22, weight: 400, color: MOLECULES, opacity: 0.55 },
+  { text: '中性原子量子计算', x: 0.5, y: 0.85, size: 0.21, weight: 400, color: ATOMS, opacity: 0.48 },
+];
+
 ---
 
 <div class="about-glass">
   <FluidGlass
     client:visible
-    text={"Quantum Optics"}
-    cloud={cloud}
+    text={lang === 'zh' ? '量子光学' : 'Quantum Optics'}
+    textWidth={lang === 'zh' ? 0.48 : 0.84}
+    cloud={lang === 'zh' ? cloudZh : cloud}
     textStroke={2}
     background="#f8f8f5"
     shape="torus"
@@ -61,23 +82,25 @@ const cloud = [
 </div>
 <div class="about-grid">
   <dl class="dl">
-    <dt>Role</dt><dd>PostDoc at Max Planc Institute of Quantum Optics</dd>
-    <dt>Field</dt><dd>{d.researchField ?? '— to be supplied'}</dd>
-    <dt>Affiliation</dt><dd>{d.affiliation ?? '— to be supplied'}</dd>
-    <dt>Google Scholar</dt>
+    <dt>{t.about.role}</dt><dd>{role}</dd>
+    <dt>{t.about.field}</dt><dd>{field}</dd>
+    <dt>{t.about.affiliation}</dt><dd>{affiliation}</dd>
+    <dt>{t.about.scholar}</dt>
     <dd>
       {d.links.length ? (
         <ul class="links">{d.links.map((l) => <li><a class="link-underline" href={l.href}>{l.label}</a></li>)}</ul>
-      ) : '— to be supplied'}
+      ) : t.about.toBeSupplied}
     </dd>
-    <dt>CV</dt><dd>{d.affiliation ?? '— to be supplied'}</dd>
+    <dt>{t.about.cv}</dt><dd>{affiliation}</dd>
   </dl>
   <div>
-    <div class="prose"><Content /></div>
+    <div class="prose">{zhBio.length ? zhBio.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>
     <p class="meta continue">
-      Continue to <a class="link-underline" href="/#research">Research</a>,
-      <a class="link-underline" href="/publications/">Publications</a> or
-      <a class="link-underline" href="/notes/">Field Notes</a>.
+      {lang === 'zh' ? (
+        <>{t.about.continue[0]}{' '}<a class="link-underline" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>、<a class="link-underline" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>。</>
+      ) : (
+        <>{t.about.continue[0]}{' '}<a class="link-underline" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>,{' '}<a class="link-underline" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>.</>
+      )}
     </p>
   </div>
 </div>

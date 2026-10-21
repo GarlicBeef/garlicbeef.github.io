@@ -1,0 +1,20 @@
+---
+/** /about/ and /zh/about/ — the language comes from the URL. */
+import Base from '@/layouts/Base.astro';
+import AboutBlock from '@/components/AboutBlock.astro';
+import { getProfile } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const d = (await getProfile()).data;
+---
+
+<Base title={t.about.title} current="about" footer={false}>
+  <div class="page wrap about">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#about')}>{t.sections.about}</a></p>
+      <h1 class="sr-only">{pick(d, 'name', lang)}</h1>
+    </header>
+    <AboutBlock />
+  </div>
+</Base>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import OptionWheel, { type OptionWheelHandle } from '../reactbits/OptionWheel';
+import { t as tr, type Lang } from '@/i18n/ui';
 import './research.css';
 
 export interface ResearchItem {
@@ -20,6 +21,7 @@ export interface ResearchItem {
 interface Props {
   items: ResearchItem[]; // already sorted newest → oldest
   sizes: string;
+  lang?: Lang;
 }
 
 /** Scroll travel per project transition, as a fraction of the viewport height. */
@@ -32,7 +34,8 @@ const REDUCE_MQ = '(prefers-reduced-motion: reduce)';
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export default function ResearchTimeline({ items, sizes }: Props) {
+export default function ResearchTimeline({ items, sizes, lang = 'en' }: Props) {
+  const t = tr(lang);
   const years = useMemo(() => Array.from(new Set(items.map((i) => i.year))), [items]);
   const yearIndexOf = useMemo(() => items.map((i) => years.indexOf(i.year)), [items, years]);
   const firstOfYear = useMemo(() => years.map((y) => items.findIndex((i) => i.year === y)), [items, years]);
@@ -168,7 +171,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
                   className={`rt__photo${i === active ? ' is-active' : ''}${item.fit === 'contain' ? ' rt__photo--contain' : ''}`}
                   aria-hidden={i !== active}
                   tabIndex={i === active ? 0 : -1}
-                  aria-label={`${item.title}, ${item.year} — open project`}
+                  aria-label={`${item.title}, ${item.year} — ${t.research.open}`}
                 >
                   {missing[item.id] ? (
                     <span className="img-missing">{item.alt}</span>
@@ -194,7 +197,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
               <div className="rt__captions">
                 {items.map((item, i) => (
                   <div key={item.id} className={`rt__caption${i === active ? ' is-active' : ''}`} aria-hidden={i !== active}>
-                    <p className="label rt__section">01 — Research</p>
+                    <p className="label rt__section">{t.sections.research}</p>
                     <h3 className="rt__title">
                       <a href={item.href} tabIndex={i === active ? 0 : -1} className="link-underline">
                         {item.title}
@@ -204,7 +207,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
                     <p className="meta">
                       {item.caption}
                       {item.location ? ` / ${item.location}` : ''} / {item.year}
-                      {sameYear.length > 1 && i === active ? `  ·  ${posInYear + 1} of ${sameYear.length} this year` : ''}
+                      {sameYear.length > 1 && i === active ? `  ·  ${t.research.inYear(posInYear + 1, sameYear.length)}` : ''}
                     </p>
                   </div>
                 ))}
@@ -212,13 +215,13 @@ export default function ResearchTimeline({ items, sizes }: Props) {
               {mode === 'static' && n > 1 && (
                 <div className="rt__step meta">
                   <button type="button" onClick={() => goTo(active - 1)} disabled={active === 0}>
-                    ← Newer
+                    {t.research.newer}
                   </button>
                   <span aria-hidden="true">
                     {String(active + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}
                   </span>
                   <button type="button" onClick={() => goTo(active + 1)} disabled={active === n - 1}>
-                    Older →
+                    {t.research.older}
                   </button>
                 </div>
               )}
@@ -230,7 +233,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
                 controlled
                 captureWheel={false}
                 draggable={false}
-                ariaLabel="Research by year — use the arrow keys to choose a year"
+                ariaLabel={t.research.wheel}
                 items={years.map(String)}
                 defaultSelected={0}
                 onChange={(j) => goTo(firstOfYear[j])}
@@ -248,7 +251,7 @@ export default function ResearchTimeline({ items, sizes }: Props) {
                 className="rt__wheel"
               />
             </div>
-            <p className="meta rt__aside">Selected experiments, over time</p>
+            <p className="meta rt__aside">{t.research.aside}</p>
         </div>
       </div>
     </div>

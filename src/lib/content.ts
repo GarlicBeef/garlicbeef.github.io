@@ -1,14 +1,15 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { localePath, type Lang } from '@/i18n/ui';
 
 export type Research = CollectionEntry<'research'>;
 export type Publication = CollectionEntry<'publications'>;
 export type Note = CollectionEntry<'notes'>;
 
-export const researchHref = (e: Research) => e.data.destination ?? `/research/${e.id}/`;
-export const noteHref = (e: Note) => e.data.destination ?? `/notes/${e.id}/`;
-export const publicationHref = (e: Publication) => `/publications/${e.id}/`;
+export const researchHref = (e: Research, lang: Lang = 'en') => e.data.destination ?? localePath(lang, `/research/${e.id}/`);
+export const noteHref = (e: Note, lang: Lang = 'en') => e.data.destination ?? localePath(lang, `/notes/${e.id}/`);
+export const publicationHref = (e: Publication, lang: Lang = 'en') => localePath(lang, `/publications/${e.id}/`);
 
 /** Most recent first; inside one year, by `order`. */
 export async function getResearch() {
@@ -50,8 +51,25 @@ export async function responsive(
   return { src: img.src, srcSet: img.srcSet.attribute, width: src.width, height: src.height };
 }
 
-const dateFmt = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-export const formatDate = (d: Date) => dateFmt.format(d);
+const dateFmt = {
+  en: new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+  zh: new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }),
+};
+export const formatDate = (d: Date, lang: Lang = 'en') => dateFmt[lang].format(d);
+
+/** Plain-text paragraphs (separated by blank lines) → array, for translated bodies kept in frontmatter. */
+export const paragraphs = (text?: string) => (text ?? '').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 export const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Minimal inline Markdown for translated paragraphs: escapes HTML, then **bold**, *italic* and `code`. */
+export function inlineMd(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}

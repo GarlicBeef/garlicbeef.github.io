@@ -1,0 +1,79 @@
+---
+/** A publication page, shared by /publications/<id>/ and /zh/publications/<id>/. */
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import { getProfile, publicationHref, pad2 } from '@/lib/content';
+import { figureSvg } from '@/lib/figures';
+import { paragraphs, inlineMd } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+
+type E = CollectionEntry<'publications'>;
+interface Props { entry: E; index: number; prev?: E; next?: E; }
+const { entry, index, prev, next } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const { Content } = await render(entry);
+const me = (await getProfile()).data.name;
+const d = entry.data;
+const title = pick(d, 'title', lang);
+const summary = pick(d, 'summary', lang);
+const figureAlt = pick(d, 'figureAlt', lang);
+const zhBody = lang === 'zh' ? paragraphs(d.zh?.body) : [];
+const links = [
+  d.doi && { label: `DOI ${d.doi}`, href: `https://doi.org/${d.doi}` },
+  d.pdf && { label: 'PDF', href: d.pdf },
+  d.preprint && { label: t.publications.preprint, href: d.preprint },
+].filter(Boolean) as { label: string; href: string }[];
+---
+
+<Base title={title} current="publications" description={summary}>
+  <article class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#publications')}>{t.sections.publications}</a> / {t.archive.file} {pad2(index + 1)}</p>
+      <h1 class="page-title" lang="en">{title}</h1>
+      <p class="meta">{d.authors.map((a, k) => <>{k > 0 && ', '}{a === me ? <strong class="me">{a}</strong> : a}</>)}</p>
+    </header>
+
+    <div class="pub-grid">
+      <div>
+        <dl class="dl">
+          <dt>{t.publications.year}</dt><dd>{d.year}</dd>
+          <dt>{t.publications.venue}</dt><dd>{pick(d, 'venue', lang)}</dd>
+          <dt>{t.publications.links}</dt>
+          <dd>
+            {links.length ? <span class="links">{links.map((l) => <a class="link-underline" href={l.href}>{l.label} ↗</a>)}</span> : <span class="muted">{t.publications.toBeSupplied}</span>}
+          </dd>
+        </dl>
+        <p class="summary">{summary}</p>
+        {d.demo && <p class="notice">Demonstration entry — not a real publication.</p>}
+        <div class="prose">{zhBody.length ? zhBody.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>
+      </div>
+      <figure class="pub-fig">
+        {d.figure ? (
+          <Image src={d.figure} alt={figureAlt ?? ''} widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 40vw" />
+        ) : (
+          <div class="pub-fig__svg" set:html={figureSvg(d.figureKind, index + 1)} />
+        )}
+        <figcaption class="meta">{d.figure ? figureAlt : t.publications.illustrative}</figcaption>
+      </figure>
+    </div>
+
+    <nav class="pager" aria-label={t.publications.title}>
+      {prev ? <a href={publicationHref(prev, lang)}>← {pick(prev.data, 'title', lang)}</a> : <a href={localePath(lang, '/#publications')}>{t.publications.backToArchive}</a>}
+      {next ? <a href={publicationHref(next, lang)}>{pick(next.data, 'title', lang)} →</a> : <a href={localePath(lang, '/publications/')}>{t.publications.index}</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .pub-grid { display: grid; grid-template-columns: 1fr minmax(260px, 38%); gap: clamp(32px, 6vw, 96px); align-items: start; }
+  .summary { font-size: 17px; line-height: 1.55; max-width: 52ch; margin: 32px 0; }
+  .muted { color: var(--muted); }
+  .links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .me { color: var(--ink); font-weight: 500; }
+  .pub-fig { margin: 0; background: #efe9dc; padding: 28px; }
+  .pub-fig__svg :global(svg) { width: 100%; height: auto; display: block; }
+  .pub-fig figcaption { margin-top: 12px; }
+  @media (max-width: 900px) { .pub-grid { grid-template-columns: 1fr; } }
+</style>

@@ -204,6 +204,13 @@ button { font: inherit; color: inherit; }
 }
 .pager a { color: var(--muted); transition: color var(--t-fast); }
 .pager a:hover { color: var(--ink); }
+.pager a { max-width: 48%; }
+.pager a + a { text-align: right; margin-left: auto; }
+@media (max-width: 560px) {
+  /* Stacked, so long titles wrap as whole lines rather than squeezing into two columns. */
+  .pager { flex-direction: column; gap: 14px; }
+  .pager a { max-width: 100%; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -211,3 +218,17 @@ button { font: inherit; color: inherit; }
     animation-duration: 1ms !important;
   }
 }
+
+/* ---------- Chinese (/zh/) ---------- */
+/* Latin glyphs keep Geist; Han characters fall through to the system's CJK face. */
+:root:lang(zh) {
+  --sans: 'Geist Variable', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Microsoft YaHei', sans-serif;
+  --mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Noto Sans CJK SC', 'Microsoft YaHei', monospace;
+}
+:lang(zh) body { line-break: strict; word-break: normal; overflow-wrap: anywhere; }
+:lang(zh) .label { letter-spacing: 0.04em; }
+:lang(zh) .meta { font-size: 12.5px; letter-spacing: 0.02em; line-height: 1.75; }
+:lang(zh) .prose { max-width: 38em; font-size: 16px; line-height: 1.9; text-align: justify; }
+:lang(zh) .prose p { margin-bottom: 1.2em; }
+:lang(zh) .page-title { letter-spacing: 0.02em; line-height: 1.35; }
+:lang(zh) [lang='en'] { text-align: start; }

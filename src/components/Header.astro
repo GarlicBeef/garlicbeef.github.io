@@ -1,29 +1,35 @@
 ---
 import { getProfile } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, alternatePath, pick } from '@/i18n/ui';
 
 interface Props {
   current?: 'research' | 'publications' | 'about' | 'notes';
 }
 const { current } = Astro.props;
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
 const profile = await getProfile();
-const { name, role, researchField, affiliation } = profile.data;
-const identity = [role, researchField, affiliation].filter(Boolean).join(' · ');
+const d = profile.data;
+const name = pick(d, 'name', lang);
+const identity = [pick(d, 'role', lang), pick(d, 'researchField', lang), pick(d, 'affiliation', lang)].filter(Boolean).join(' · ');
+const home = localePath(lang, '/');
+const other = alternatePath(lang, Astro.url.pathname);
 
 const items = [
-  { key: 'research', label: 'Research', href: '/#research' },
-  { key: 'publications', label: 'Publications', href: '/#publications' },
-  { key: 'about', label: 'About', href: '/#about' },
-  { key: 'notes', label: 'Field Notes', href: '/#field-notes' },
+  { key: 'research', label: t.nav.research, href: `${home}#research` },
+  { key: 'publications', label: t.nav.publications, href: `${home}#publications` },
+  { key: 'about', label: t.nav.about, href: `${home}#about` },
+  { key: 'notes', label: t.nav.notes, href: `${home}#field-notes` },
 ] as const;
 ---
 
 <header class="site-header" data-header>
   <div class="site-header__inner wrap">
-    <a class="site-header__id" href="/" aria-label={`${name}, home`}>
+    <a class="site-header__id" href={home} aria-label={`${name}, ${t.home}`}>
       <span class="site-header__name">{name}</span>
       <span class="site-header__role">{identity}</span>
     </a>
-    <nav aria-label="Primary">
+    <nav aria-label={t.navLabel} class="site-header__nav">
       <ul class="site-nav">
         {items.map((item) => (
           <li>
@@ -38,6 +44,14 @@ const items = [
           </li>
         ))}
       </ul>
+      <a
+        class="site-lang"
+        href={other.href}
+        hreflang={other.lang === 'zh' ? 'zh-CN' : 'en'}
+        lang={other.lang === 'zh' ? 'zh-CN' : 'en'}
+        aria-label={t.switchLabel}
+        data-lang-switch
+      >{t.switchTo}</a>
     </nav>
   </div>
 </header>
@@ -94,6 +108,19 @@ const items = [
     transition: background-size var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
   }
   .site-nav__link:hover { color: var(--ink); }
+  .site-header__nav { display: flex; align-items: flex-start; gap: clamp(16px, 2.4vw, 40px); }
+  .site-lang {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    padding: 1px 7px 3px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    white-space: nowrap;
+  }
+  .site-lang:hover { color: var(--ink); border-color: var(--faint); }
   .site-nav__link.is-active { color: var(--ink); background-size: 100% 1px; }
 
   @media (max-width: 720px) {
@@ -101,6 +128,9 @@ const items = [
     .site-header__role { display: none; }
     .site-nav { gap: 18px; }
     .site-nav__link { font-size: 11.5px; padding-block: 6px; }
+    /* The language switch sits opposite the name, so the nav row keeps its full width. */
+    .site-header__inner { position: relative; }
+    .site-lang { position: absolute; top: 11px; right: var(--gutter, 20px); padding: 3px 9px 4px; }
   }
 </style>
 

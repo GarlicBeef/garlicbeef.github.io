@@ -1,3 +1,4 @@
+import { t as tr, type Lang } from '@/i18n/ui';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import Noise from '../reactbits/Noise';
@@ -19,6 +20,7 @@ export interface FilmNote {
 
 interface Props {
   notes: FilmNote[];
+  lang?: Lang;
 }
 
 /** Pixels per second at full speed. */
@@ -96,7 +98,8 @@ function Frame({
   );
 }
 
-export default function Filmstrip({ notes }: Props) {
+export default function Filmstrip({ notes, lang = 'en' }: Props) {
+  const t = tr(lang);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
   const [auto, setAuto] = useState(false);
@@ -268,7 +271,7 @@ export default function Filmstrip({ notes }: Props) {
         onClickCapture={onClickCapture}
         onDragStart={(e) => e.preventDefault()}
       >
-        <ul ref={trackRef} className="fs__track" aria-label="Field notes, as a filmstrip">
+        <ul ref={trackRef} className="fs__track" aria-label={t.notes.strip}>
           {Array.from({ length: sets }, (_, s) =>
             notes.map((n) => (
               <Frame
@@ -301,10 +304,10 @@ export default function Filmstrip({ notes }: Props) {
         {auto && (
           <div className="fs__controls meta">
             <span className="fs__hint" aria-hidden="true">
-              Drag to explore
+              {t.notes.drag}
             </span>
             <button type="button" className="fs__toggle" aria-pressed={userPaused} onClick={() => setUserPaused((p) => !p)}>
-              {userPaused ? 'Resume ▸' : 'Pause ❙❙'}
+              {userPaused ? t.notes.resume : t.notes.pause}
             </button>
           </div>
         )}

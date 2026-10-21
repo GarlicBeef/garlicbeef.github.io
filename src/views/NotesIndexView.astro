@@ -1,0 +1,38 @@
+---
+/** The field-notes index, shared by /notes/ and /zh/notes/. */
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import { getNotes, noteHref, formatDate } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+const all = await getNotes();
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+---
+
+<Base title={t.notes.title} current="notes">
+  <div class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#field-notes')}>{t.sections.notes}</a></p>
+      <h1 class="page-title">{t.notes.all}</h1>
+    </header>
+    <ul class="n-grid">
+      {all.map((n) => (
+        <li>
+          <a href={noteHref(n, lang)} class="n-card">
+            <Image src={n.data.cover} alt={pick(n.data, 'coverAlt', lang)} widths={[480, 800]} sizes="(max-width: 640px) 100vw, 33vw" class="n-img" style={`object-position: ${n.data.coverPosition}`} />
+            <span class="n-title">{pick(n.data, 'title', lang)}</span>
+            <span class="meta">{formatDate(n.data.date, lang)}{pick(n.data, 'location', lang) && ` / ${pick(n.data, 'location', lang)}`}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .n-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 48px 32px; }
+  .n-card { display: grid; gap: 4px; }
+  :global(.n-img) { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; margin-bottom: 10px; filter: grayscale(1); transition: filter var(--t-photo) var(--ease); }
+  .n-card:hover :global(.n-img), .n-card:focus-visible :global(.n-img) { filter: none; }
+  .n-title { font-size: 15px; }
+</style>

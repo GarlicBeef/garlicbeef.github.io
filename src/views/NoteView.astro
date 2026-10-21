@@ -1,0 +1,44 @@
+---
+/** A field note, shared by /notes/<id>/ and /zh/notes/<id>/. */
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import FadeContent from '@/components/reactbits/FadeContent';
+import { noteHref, formatDate, isoDate, paragraphs, inlineMd } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+
+type E = CollectionEntry<'notes'>;
+interface Props { entry: E; newer?: E; older?: E; }
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const title = pick(d, 'title', lang);
+const location = pick(d, 'location', lang);
+const zhBody = lang === 'zh' ? paragraphs(d.zh?.body) : [];
+---
+
+<Base title={title} current="notes">
+  <article class="page wrap note">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#field-notes')}>{t.sections.notes}</a> / {t.notes.frame(String(d.frame).padStart(2, '0'))}</p>
+      <h1 class="page-title">{title}</h1>
+      <p class="meta"><time datetime={isoDate(d.date)}>{formatDate(d.date, lang)}</time>{location && ` / ${location}`}</p>
+    </header>
+    <FadeContent client:load effect="develop" duration={1.1} trigger="mount" className="note-photo">
+      <Image src={d.cover} alt={pick(d, 'coverAlt', lang)} widths={[720, 1200, 1800]} sizes="(max-width: 900px) 100vw, 70vw" loading="eager" />
+    </FadeContent>
+    {d.demo && <p class="notice">{lang === 'zh' ? '示例札记：图片与文字均为占位内容。' : 'Demonstration note — illustrative image and placeholder text.'}</p>}
+    <div class="prose">{zhBody.length ? zhBody.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>
+    <nav class="pager" aria-label={t.notes.title}>
+      {newer ? <a href={noteHref(newer, lang)}>← {pick(newer.data, 'title', lang)}</a> : <a href={localePath(lang, '/#field-notes')}>{t.notes.back}</a>}
+      {older ? <a href={noteHref(older, lang)}>{pick(older.data, 'title', lang)} →</a> : <a href={localePath(lang, '/notes/')}>{t.notes.allNext}</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  :global(.note-photo) { width: fit-content; max-width: min(1100px, 100%); margin-bottom: 36px; background: #1b1b1a; }
+  :global(.note-photo img) { width: auto; max-width: 100%; height: auto; max-height: calc(100vh - var(--header-h) - 64px); }
+</style>

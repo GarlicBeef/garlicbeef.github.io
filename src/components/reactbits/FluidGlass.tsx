@@ -63,12 +63,15 @@ export interface FluidGlassProps {
   cloud?: CloudWord[];
   /** ADDED (local): draw the main text as an outline of this width (px) instead of filled. */
   textStroke?: number;
+  /** ADDED (local): share of the panel width the auto-sized main text fills (default 0.84). */
+  textWidth?: number;
 }
 
 interface Settings {
   text: string;
   cloud: CloudWord[];
   textStroke: number;
+  textWidth: number;
   textColor?: string;
   fontFamily?: string;
   fontWeight: number | string;
@@ -693,7 +696,8 @@ const FluidGlass = ({
   style,
   children,
   cloud = [],
-  textStroke = 0
+  textStroke = 0,
+  textWidth = 0.84
 }: FluidGlassProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -706,6 +710,7 @@ const FluidGlass = ({
     text: String(text ?? ''),
     cloud,
     textStroke: Math.max(0, textStroke),
+    textWidth: clamp(textWidth, 0.1, 1),
     textColor,
     fontFamily,
     fontWeight,
@@ -898,7 +903,7 @@ const FluidGlass = ({
       const fill = s.textColor || computed.color || '#ffffff';
       const width = canvas.width;
       const height = canvas.height;
-      const key = [s.text, JSON.stringify(s.cloud), s.textStroke, family, fill, s.fontWeight, s.fontSize, width, height].join('|');
+      const key = [s.text, JSON.stringify(s.cloud), s.textStroke, s.textWidth, family, fill, s.fontWeight, s.fontSize, width, height].join('|');
       if (key === textState.key) return;
       textState.key = key;
       textCanvas.width = width;
@@ -913,7 +918,7 @@ const FluidGlass = ({
         if (!s.fontSize) {
           ctx.font = font(100);
           const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 1);
-          px = Math.min((width * 0.84 * 100) / widest, (height * 0.64) / (lines.length * 1.02));
+          px = Math.min((width * s.textWidth * 100) / widest, (height * 0.64) / (lines.length * 1.02));
         }
         ctx.font = font(px);
         ctx.fillStyle = fill;

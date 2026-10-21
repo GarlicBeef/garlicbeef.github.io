@@ -1,3 +1,4 @@
+import { t as tr, type Lang } from '@/i18n/ui';
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { FigureKind } from '@/lib/figures';
 import './archive.css';
@@ -19,6 +20,7 @@ export interface ArchivePaper {
 interface Props {
   papers: ArchivePaper[];
   indexHref: string;
+  lang?: Lang;
 }
 
 const ArchiveScene = lazy(() => import('./ArchiveScene'));
@@ -67,7 +69,8 @@ function ArchiveFallback({ papers, active }: { papers: ArchivePaper[]; active: n
   );
 }
 
-export default function Archive({ papers, indexHref }: Props) {
+export default function Archive({ papers, indexHref, lang = 'en' }: Props) {
+  const t = tr(lang);
   const stageRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
   const [near, setNear] = useState(false);
@@ -116,7 +119,7 @@ export default function Archive({ papers, indexHref }: Props) {
       </div>
 
       <div className="ar__side">
-        <ol className="ar__index" aria-label="Selected publications">
+        <ol className="ar__index" aria-label={t.archive.indexLabel}>
           {papers.map((p, i) => (
             <li key={p.id}>
               <a
@@ -141,26 +144,26 @@ export default function Archive({ papers, indexHref }: Props) {
         {current ? (
           <>
             <p className="label ar__caption-kicker">
-              File {current.number} {current.demo && <span className="demo-tag">Demo</span>}
+              {t.archive.file} {current.number} {current.demo && <span className="demo-tag">Demo</span>}
             </p>
             <p className="ar__caption-title">{current.title}</p>
             <p className="meta">
               {current.year} / {current.venue}
             </p>
             <p className="meta ar__caption-summary">{current.summary}</p>
-            <p className="meta ar__caption-hint">Click or press Enter to open</p>
+            <p className="meta ar__caption-hint">{t.archive.hint}</p>
           </>
         ) : (
           <>
-            <p className="label ar__caption-kicker">Selected publications</p>
+            <p className="label ar__caption-kicker">{t.archive.selected}</p>
             <p className="meta ar__caption-summary">
-              Papers kept as an archive. Point at a file, or use the index, to read its label.
+              {t.archive.intro}
             </p>
           </>
         )}
         </div>
         <a className="ar__all label link-underline" href={indexHref}>
-          View all publications ↗
+          {t.archive.viewAll}
         </a>
       </div>
     </div>

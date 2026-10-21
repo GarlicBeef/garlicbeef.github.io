@@ -1,0 +1,60 @@
+---
+/** /publications/ and /zh/publications/ */
+import Base from '@/layouts/Base.astro';
+import { getPublications, getProfile, publicationHref, pad2 } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const me = (await getProfile()).data.name;
+const all = await getPublications();
+const byYear = [...new Set(all.map((p) => p.data.year))].sort((a, b) => b - a)
+  .map((y) => ({ year: y, items: all.filter((p) => p.data.year === y) }));
+const hasDemo = all.some((p) => p.data.demo);
+---
+
+<Base title={t.publications.title} current="publications">
+  <div class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#publications')}>{t.sections.publications}</a></p>
+      <h1 class="page-title">{t.publications.indexTitle}</h1>
+    </header>
+    {hasDemo && <p class="notice">Demonstration entries — no bibliographic records have been supplied yet. Replace them in <code>src/content/publications/</code>.</p>}
+    {byYear.map(({ year, items }) => (
+      <section class="pub-year" aria-labelledby={`y-${year}`}>
+        <h2 id={`y-${year}`} class="mono pub-year__h">{year}</h2>
+        <ol class="pub-list">
+          {items.map((p) => (
+            <li class="pub">
+              <span class="mono pub__num">{pad2(all.indexOf(p) + 1)}</span>
+              <div>
+                <a class="pub__title" href={publicationHref(p, lang)}>{pick(p.data, 'title', lang)}</a>
+                <p class="meta pub__line">{p.data.authors.map((a, k) => <>{k > 0 && ', '}{a === me ? <strong class="me">{a}</strong> : a}</>)}</p>
+                <p class="meta pub__line"><em>{pick(p.data, 'venue', lang)}</em>, {p.data.year}</p>
+                <p class="meta pub__links">
+                  {p.data.doi && <a class="link-underline" href={`https://doi.org/${p.data.doi}`}>DOI ↗</a>}
+                  {p.data.pdf && <a class="link-underline" href={p.data.pdf}>PDF ↗</a>}
+                  {p.data.preprint && <a class="link-underline" href={p.data.preprint}>{t.publications.preprint} ↗</a>}
+                  <a class="link-underline" href={publicationHref(p, lang)}>{t.publications.details}</a>
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .pub-year { display: grid; grid-template-columns: 120px 1fr; gap: 24px; border-top: 1px solid var(--rule); padding: 22px 0 8px; }
+  .pub-year__h { margin: 0; font-size: 13px; font-weight: 400; }
+  .pub-list { list-style: none; margin: 0; padding: 0; }
+  .pub { display: grid; grid-template-columns: 36px 1fr; gap: 12px; margin-bottom: 26px; max-width: 80ch; }
+  .pub__num { font-size: 12px; color: var(--muted); padding-top: 3px; }
+  .pub__title { font-size: 16.5px; line-height: 1.4; }
+  .pub__title:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .pub__line { margin: 4px 0 0; }
+  .pub__links { display: flex; gap: 18px; margin: 8px 0 0; }
+  .me { color: var(--ink); font-weight: 500; }
+  @media (max-width: 640px) { .pub-year { grid-template-columns: 1fr; gap: 12px; } }
+</style>

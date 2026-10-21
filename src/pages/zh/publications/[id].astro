@@ -1,0 +1,11 @@
+---
+import PublicationView from '@/views/PublicationView.astro';
+import { getPublications } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const all = await getPublications();
+  return all.map((entry, i) => ({ params: { id: entry.id }, props: { entry, index: i, prev: all[i - 1], next: all[i + 1] } }));
+}
+---
+
+<PublicationView {...Astro.props} />

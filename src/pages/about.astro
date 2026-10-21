@@ -1,16 +1,5 @@
 ---
-import Base from '@/layouts/Base.astro';
-import AboutBlock from '@/components/AboutBlock.astro';
-import { getProfile } from '@/lib/content';
-const d = (await getProfile()).data;
+import AboutView from '@/views/AboutView.astro';
 ---
 
-<Base title="About" current="about" footer={false}>
-  <div class="page wrap about">
-    <header class="page-head">
-      <p class="label"><a class="link-underline" href="/#about">03 — About</a></p>
-      <h1 class="sr-only">{d.name}</h1>
-    </header>
-    <AboutBlock />
-  </div>
-</Base>
+<AboutView />

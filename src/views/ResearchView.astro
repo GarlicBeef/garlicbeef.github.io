@@ -1,0 +1,64 @@
+---
+/** A research project page, shared by /research/<id>/ and /zh/research/<id>/. */
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import FadeContent from '@/components/reactbits/FadeContent';
+import { researchHref, paragraphs, inlineMd } from '@/lib/content';
+import { t as tr, langFromUrl, localePath, pick } from '@/i18n/ui';
+
+type E = CollectionEntry<'research'>;
+interface Props { entry: E; newer?: E; older?: E; }
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const lang = langFromUrl(Astro.url);
+const t = tr(lang);
+const title = pick(d, 'title', lang);
+const caption = pick(d, 'caption', lang);
+const location = pick(d, 'location', lang);
+const zhBody = lang === 'zh' ? paragraphs(d.zh?.body) : [];
+---
+
+<Base title={title} current="research" description={`${title} (${d.year}). ${caption}.`}>
+  <article class="page wrap">
+    <header class="page-head">
+      <p class="label"><a class="link-underline" href={localePath(lang, '/#research')}>{t.sections.research}</a> / {d.year}</p>
+      <h1 class="page-title">{title}</h1>
+    </header>
+
+    <FadeContent client:load effect="develop" duration={0.9} trigger="mount" className="detail-photo">
+      <Image src={d.image} alt={pick(d, 'imageAlt', lang)} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 900px) 100vw, 80vw" loading="eager" fetchpriority="high" />
+    </FadeContent>
+
+    <div class="detail-grid">
+      <dl class="dl">
+        <dt>{t.research.project}</dt><dd>{title}</dd>
+        <dt>{t.research.setup}</dt><dd>{caption}</dd>
+        {location && (<><dt>{t.research.location}</dt><dd>{location}</dd></>)}
+        <dt>{t.research.year}</dt><dd>{d.year}</dd>
+      </dl>
+      <div>
+        {d.demo && <p class="notice">{lang === 'zh' ? '示例内容：图片为示意渲染，文字为占位文本。' : 'Demonstration content — the image is an illustrative render and the text is placeholder copy.'}</p>}
+        <div class="prose">{zhBody.length ? zhBody.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>
+      </div>
+    </div>
+
+    <nav class="pager" aria-label={t.nav.research}>
+      {newer ? <a href={researchHref(newer, lang)}>← {newer.data.year} · {pick(newer.data, 'title', lang)}</a> : <a href={localePath(lang, '/#research')}>{t.research.back}</a>}
+      {older ? <a href={researchHref(older, lang)}>{older.data.year} · {pick(older.data, 'title', lang)} →</a> : <a href={localePath(lang, '/#research')}>{t.research.backEnd}</a>}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  :global(.detail-photo) { background: #e8e8e3; margin-bottom: 18px; }
+  :global(.detail-photo img) { width: 100%; height: auto; max-height: 78vh; object-fit: cover; }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: minmax(240px, 30%) 1fr;
+    gap: 48px;
+    margin-top: 40px;
+  }
+  @media (max-width: 800px) { .detail-grid { grid-template-columns: 1fr; gap: 28px; } }
+</style>

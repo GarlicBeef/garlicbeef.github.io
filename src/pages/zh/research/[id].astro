@@ -1,0 +1,11 @@
+---
+import ResearchView from '@/views/ResearchView.astro';
+import { getResearch } from '@/lib/content';
+
+export async function getStaticPaths() {
+  const all = await getResearch();
+  return all.map((entry, i) => ({ params: { id: entry.id }, props: { entry, newer: all[i - 1], older: all[i + 1] } }));
+}
+---
+
+<ResearchView {...Astro.props} />

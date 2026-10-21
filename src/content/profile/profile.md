@@ -8,6 +8,15 @@ links: []
 #   - { label: "Email", href: "mailto:name@example.org" }
 #   - { label: "CV (PDF)", href: "/cv.pdf" }
 demo: true
+zh:
+  name: "张熙悦"
+  role: "实验物理学家"
+  body: |
+    **示例简介。** 这一段是简短简介的占位文字：目前的职位、研究兴趣，以及研究工作的来龙去脉。这里的文字都还不是真实的个人信息。
+
+    第二段可以写教育背景和过往经历，第三段写实验室之外的事——比如对电影由来已久的喜爱，首页的札记记录了其中一部分。
+
+    编辑 src/content/profile/profile.md 中的 zh 部分即可替换这段中文文字。
 ---
 
 **Demonstration biography.** This paragraph is a placeholder for a short biography: current position,

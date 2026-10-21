@@ -1,10 +1,20 @@
 ---
 import Base from '@/layouts/Base.astro';
+// One 404 page serves both languages (GitHub Pages has a single 404.html).
 ---
-<Base title="Not found">
+<Base title="Not found · 未找到页面">
   <div class="page wrap">
     <p class="label">404</p>
     <h1 class="page-title">This room is not part of the exhibition.</h1>
-    <p class="meta" style="margin-top:24px"><a class="link-underline" href="/">Return to the entrance</a></p>
+    <p class="page-title page-title--alt" lang="zh-CN">这个展厅不在本次展览之中。</p>
+    <p class="meta" style="margin-top:24px">
+      <a class="link-underline" href="/">Return to the entrance</a>
+      <span aria-hidden="true"> · </span>
+      <a class="link-underline" href="/zh/" lang="zh-CN">返回入口</a>
+    </p>
   </div>
 </Base>
+
+<style>
+  .page-title--alt { margin-top: 10px; color: var(--muted); }
+</style>

@@ -26,6 +26,11 @@ const research = defineCollection({
       /** 'contain' shows the whole image (e.g. a wide figure) instead of cropping it to the frame. */
       imageFit: z.enum(['cover', 'contain']).default('cover'),
       demo: z.boolean().default(false),
+      /** Chinese translations; any field left out falls back to English. */
+      zh: z
+        .object({ title: z.string(), caption: z.string(), imageAlt: z.string(), location: z.string(), body: z.string() })
+        .partial()
+        .optional(),
     }),
 });
 
@@ -49,6 +54,11 @@ const publications = defineCollection({
       /** Display order in the archive (01, 02, …). */
       order: z.number(),
       demo: z.boolean().default(false),
+      /** Chinese translations; any field left out falls back to English (paper titles usually stay in English). */
+      zh: z
+        .object({ title: z.string(), venue: z.string(), summary: z.string(), figureAlt: z.string(), body: z.string() })
+        .partial()
+        .optional(),
     }),
 });
 
@@ -68,6 +78,11 @@ const notes = defineCollection({
       /** Optional override; defaults to /notes/<id>/ */
       destination: z.string().optional(),
       demo: z.boolean().default(false),
+      /** Chinese translations; any field left out falls back to English. */
+      zh: z
+        .object({ title: z.string(), location: z.string(), coverAlt: z.string(), body: z.string() })
+        .partial()
+        .optional(),
     }),
 });
 
@@ -82,6 +97,11 @@ const profile = defineCollection({
       .array(z.object({ label: z.string(), href: z.string() }))
       .default([]),
     demo: z.boolean().default(false),
+    /** Chinese translations; any field left out falls back to English. */
+    zh: z
+      .object({ name: z.string(), role: z.string(), researchField: z.string(), affiliation: z.string(), body: z.string() })
+      .partial()
+      .optional(),
   }),
 });
 
