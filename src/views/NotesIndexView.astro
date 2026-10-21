@@ -33,6 +33,17 @@ const t = tr(lang);
   .n-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 48px 32px; }
   .n-card { display: grid; gap: 4px; }
   :global(.n-img) { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; margin-bottom: 10px; filter: grayscale(1); transition: filter var(--t-photo) var(--ease); }
-  .n-card:hover :global(.n-img), .n-card:focus-visible :global(.n-img) { filter: none; }
+  .n-card:hover :global(.n-img), .n-card:focus-visible :global(.n-img), .n-card.is-focus :global(.n-img) { filter: none; }
   .n-title { font-size: 15px; }
 </style>
+
+<script>
+  // Touch screens have no hover: the photo crossing the middle of the screen develops into colour.
+  if (window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.target.classList.toggle('is-focus', e.isIntersecting)),
+      { rootMargin: '-45% 0px -45% 0px' },
+    );
+    document.querySelectorAll('.n-card').forEach((c) => io.observe(c));
+  }
+</script>

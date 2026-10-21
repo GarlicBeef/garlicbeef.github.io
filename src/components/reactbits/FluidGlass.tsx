@@ -1068,7 +1068,9 @@ const FluidGlass = ({
 
     const radius = () => {
       const s = settingsRef.current;
-      return Math.min(s.size / 2, Math.min(view.width, view.height) * 0.36);
+      // ADDED (local): on narrow panels (phones) the glass also scales with the panel width,
+      // so it covers part of the words instead of most of them. Wide panels are unaffected.
+      return Math.min(s.size / 2, Math.min(view.width, view.height) * 0.36, view.width * 0.23);
     };
 
     const bindContent = (u: Uniforms, s: Settings) => {

@@ -159,10 +159,8 @@
 .fs--manual .fs__below { display: none; }
 .fs--manual .fs__grain { display: none; }
 
-/* Without hover (touch), photographs are shown in colour. */
-@media (hover: none), (pointer: coarse) {
-  .fs__img img { filter: none; }
-}
+/* Without hover (touch), the frame settled in view develops into colour (set in Filmstrip.tsx). */
+.fs__frame.is-focus .fs__img img { filter: none; }
 @media (max-width: 1200px) { .fs { --frame-h: 232px; } }
 @media (min-width: 1680px) { .fs { --frame-h: 296px; } }
 @media (max-width: 720px) {

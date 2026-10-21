@@ -165,6 +165,53 @@ export default function Filmstrip({ notes, lang = 'en' }: Props) {
     return () => ro.disconnect();
   }, [auto, copies, notes.length]);
 
+  // Touch / manual mode has no hover, so the frame that has settled into view "develops"
+  // from grey to colour instead: the most visible frame, once the strip is on screen.
+  useEffect(() => {
+    if (auto) return;
+    const vp = viewportRef.current;
+    const track = trackRef.current;
+    if (!vp || !track) return;
+    let onScreen = false;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const frames = Array.from(track.querySelectorAll<HTMLElement>('.fs__frame'));
+      const v = vp.getBoundingClientRect();
+      let best: HTMLElement | null = null;
+      let bestSeen = 0;
+      for (const f of frames) {
+        const r = f.getBoundingClientRect();
+        const seen = Math.max(0, Math.min(r.right, v.right) - Math.max(r.left, v.left)) / Math.max(1, r.width);
+        if (seen > bestSeen + 0.01) {
+          best = f;
+          bestSeen = seen;
+        }
+      }
+      frames.forEach((f) => f.classList.toggle('is-focus', onScreen && f === best && bestSeen > 0.6));
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    const io = new IntersectionObserver(
+      (e) => {
+        onScreen = e.some((i) => i.isIntersecting);
+        schedule();
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(vp);
+    vp.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      io.disconnect();
+      vp.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      cancelAnimationFrame(raf);
+      track.querySelectorAll('.fs__frame.is-focus').forEach((f) => f.classList.remove('is-focus'));
+    };
+  }, [auto, notes.length]);
+
   // Steady motion via GSAP's ticker; only while on screen.
   useEffect(() => {
     if (!auto) return;
