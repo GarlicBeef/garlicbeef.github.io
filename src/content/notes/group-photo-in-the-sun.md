@@ -1,14 +1,14 @@
 ---
-title: "A group photo in the sun"
+title: "A group photo with the diving coach"
 date: 2026-04-15
 # location: ""   ← add a place if you like
 cover: ../../assets/field_photos/IMG_8163.jpg
-coverAlt: "A sunny selfie of three people in front of sand-coloured buildings, a fourth person waving in the background."
+coverAlt: "Diving - First time im my life"
 coverPosition: "50% 40%"
 frame: 5
 zh:
-  title: "阳光下的合影"
-  coverAlt: "阳光下三人在沙色建筑前自拍，背景里还有一人在挥手。"
+  title: "和潜水教练的合影"
+  coverAlt: "非常好的人生第一次潜水体验，很棒的教练"
 ---
 
 <!-- Write the note here (optional). -->

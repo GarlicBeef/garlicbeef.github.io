@@ -1,5 +1,5 @@
 ---
-title: "Masks over the reef"
+title: "My Wife and Me diving"
 date: 2026-10-19
 # location: ""   ← add a place if you like
 cover: ../../assets/field_photos/IMG_0390.jpg
