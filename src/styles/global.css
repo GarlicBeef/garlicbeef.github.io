@@ -192,6 +192,21 @@ button { font: inherit; color: inherit; }
 .dl dt { color: var(--muted); }
 .dl dd { margin: 0; color: var(--ink); }
 
+/* ---------- Phones: touch targets of at least 44px, 13px floor for small text ---------- */
+@media (max-width: 720px) {
+  .meta { font-size: 13px; }
+  /* Label above value, so long values are not squeezed into a narrow column. */
+  .dl { grid-template-columns: 1fr; gap: 2px; font-size: 14.5px; }
+  .dl dt { margin-top: 14px; font-size: 13px; }
+  .dl dt:first-child { margin-top: 0; }
+}
+@media (max-width: 720px), (pointer: coarse) {
+  .pager a { display: inline-flex; align-items: center; min-height: 44px; }
+  /* Underlined links keep their underline under the text; the larger hit area is invisible. */
+  .tap { position: relative; }
+  .tap::after { content: ''; position: absolute; left: -6px; right: -6px; top: 50%; height: 44px; transform: translateY(-50%); }
+}
+
 .pager {
   display: flex;
   justify-content: space-between;

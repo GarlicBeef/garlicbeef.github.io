@@ -54,6 +54,8 @@ export interface FluidGlassProps {
   morphOnClick?: boolean;
   onShapeChange?: (shape: Shape) => void;
   position?: [number, number];
+  /** ADDED (local): resting position used when the panel is narrower than 560px (phones). */
+  positionNarrow?: [number, number];
   intro?: boolean;
   maxDevicePixelRatio?: number;
   className?: string;
@@ -98,6 +100,7 @@ interface Settings {
   morphOnClick: boolean;
   onShapeChange?: (shape: Shape) => void;
   position: number[];
+  positionNarrow?: number[];
   intro: boolean;
   maxRatio: number;
 }
@@ -690,6 +693,7 @@ const FluidGlass = ({
   morphOnClick = true,
   onShapeChange,
   position = [0.5, 0.5],
+  positionNarrow,
   intro = true,
   maxDevicePixelRatio = 2,
   className = '',
@@ -737,6 +741,7 @@ const FluidGlass = ({
     morphOnClick,
     onShapeChange,
     position: [clamp(position?.[0] ?? 0.5, 0, 1), clamp(position?.[1] ?? 0.5, 0, 1)],
+    positionNarrow: positionNarrow ? [clamp(positionNarrow[0], 0, 1), clamp(positionNarrow[1], 0, 1)] : undefined,
     intro,
     maxRatio: clamp(maxDevicePixelRatio, 0.5, 3)
   };
@@ -1053,8 +1058,9 @@ const FluidGlass = ({
       view.height = cssHeight;
       view.ratio = width / cssWidth;
       if (!placed) {
-        body.x = s.position[0] * cssWidth;
-        body.y = s.position[1] * cssHeight;
+        const start = cssWidth < 560 && s.positionNarrow ? s.positionNarrow : s.position;
+        body.x = start[0] * cssWidth;
+        body.y = start[1] * cssHeight;
         body.anchorX = body.x;
         body.anchorY = body.y;
         placed = true;
@@ -1070,7 +1076,7 @@ const FluidGlass = ({
       const s = settingsRef.current;
       // ADDED (local): on narrow panels (phones) the glass also scales with the panel width,
       // so it covers part of the words instead of most of them. Wide panels are unaffected.
-      return Math.min(s.size / 2, Math.min(view.width, view.height) * 0.36, view.width * 0.23);
+      return Math.min(s.size / 2, Math.min(view.width, view.height) * 0.36, view.width * 0.14);
     };
 
     const bindContent = (u: Uniforms, s: Settings) => {
@@ -1173,8 +1179,9 @@ const FluidGlass = ({
 
       const size = radius();
       if (!pointer.grabbed && s.interaction !== 'drag') {
-        body.anchorX = s.position[0] * view.width;
-        body.anchorY = s.position[1] * view.height;
+        const rest = view.width < 560 && s.positionNarrow ? s.positionNarrow : s.position;
+        body.anchorX = rest[0] * view.width;
+        body.anchorY = rest[1] * view.height;
       }
       const drifting = s.idle && !reduced;
       if (drifting && !pointer.grabbed) {

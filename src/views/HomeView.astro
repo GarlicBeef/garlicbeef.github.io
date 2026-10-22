@@ -78,7 +78,15 @@ const first = researchItems[0]?.image;
 ---
 
 <Base preload={first ? { src: first.src, srcSet: first.srcSet, sizes: researchSizes } : undefined}>
-  <h1 class="sr-only">{pick(profile.data, 'name', lang)} — {pick(profile.data, 'role', lang)}</h1>
+  <!-- Who this is, before anything else -->
+  <header class="intro wrap">
+    <h1 class="intro__name">{pick(profile.data, 'name', lang)}</h1>
+    <p class="intro__role meta">
+      <span>{pick(profile.data, 'role', lang)}</span>
+      {pick(profile.data, 'affiliation', lang) && <span>{pick(profile.data, 'affiliation', lang)}</span>}
+    </p>
+    {pick(profile.data, 'intro', lang) && <p class="intro__line">{pick(profile.data, 'intro', lang)}</p>}
+  </header>
 
   <!-- 01 — Research -->
   <section id="research" class="room room--research" aria-labelledby="research-h" tabindex="-1">
@@ -117,11 +125,24 @@ const first = researchItems[0]?.image;
       <p class="meta room__intro">{t.intros.notes}</p>
     </header>
     <Filmstrip client:idle notes={filmNotes} lang={lang} />
-    <p class="wrap room__more meta"><a class="link-underline" href={localePath(lang, '/notes/')}>{t.notes.allLink}</a></p>
+    <p class="wrap room__more meta"><a class="link-underline tap" href={localePath(lang, '/notes/')}>{t.notes.allLink}</a></p>
   </section>
 </Base>
 
 <style>
+  .intro { padding-top: clamp(28px, 6vh, 64px); padding-bottom: clamp(4px, 2vh, 16px); }
+  .intro__name {
+    margin: 0 0 12px;
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: clamp(30px, 4.2vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .intro__role { margin: 0 0 14px; display: grid; gap: 2px; color: var(--ink-2); font-size: 13.5px; }
+  .intro__line { margin: 0; max-width: 46ch; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.5; color: var(--ink-2); }
+  :global(:lang(zh)) .intro__line { max-width: 30em; line-height: 1.75; }
   .room { outline: none; }
   .room--publications {
     padding-top: clamp(40px, 7vh, 72px);
@@ -145,5 +166,14 @@ const first = researchItems[0]?.image;
   .room__more { margin-top: 28px; }
   @media (min-width: 721px) {
     .room__more { text-align: left; }
+  }
+  /* Phones: section spacing about a third tighter. */
+  @media (max-width: 720px) {
+    .room--publications, .room--about, .room--notes { padding-top: 28px; }
+    .room--publications { padding-bottom: 24px; }
+    .room--about { padding-bottom: 28px; }
+    .room--notes { padding-bottom: 24px; }
+    .room--notes .room__head, .room__head { margin-bottom: 18px; }
+    .room__more { margin-top: 12px; }
   }
 </style>

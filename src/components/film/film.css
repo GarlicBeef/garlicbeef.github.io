@@ -157,6 +157,7 @@
   max-width: calc(var(--frame-h) * 1.5);
 }
 .fs--manual .fs__inline-title { color: var(--ink); }
+.fs__inline-num { font-family: var(--mono); color: #b8721f; margin-right: 8px; }
 .fs--manual .fs__below { display: none; }
 .fs--manual .fs__grain { display: none; }
 
@@ -166,7 +167,8 @@
 @media (min-width: 1680px) { .fs { --frame-h: 296px; } }
 @media (max-width: 720px) {
   .fs { --frame-h: 200px; --band: 30px; }
-  .fs__edge { font-size: 10.5px; padding-inline: 10px; }
+  /* Frame numbers move from the sprocket band into the caption, where they can be read. */
+  .fs__edge > span { display: none; }
   .fs__edge-mark { display: none; }
   .fs__edge--top { align-items: flex-end; padding-bottom: 2px; }
   .fs__edge--bottom { padding-top: 2px; }

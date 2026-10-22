@@ -162,7 +162,7 @@ export default function Archive({ papers, indexHref, lang = 'en' }: Props) {
           </>
         )}
         </div>
-        <a className="ar__all label link-underline" href={indexHref}>
+        <a className="ar__all label link-underline tap" href={indexHref}>
           {t.archive.viewAll}
         </a>
       </div>

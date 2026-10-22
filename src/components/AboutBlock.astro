@@ -63,6 +63,8 @@ const cloudZh = [
     background="#f8f8f5"
     shape="torus"
     size={210}
+    position={[0.86, 0.19]}
+    positionNarrow={[0.15, 0.12]}
     refraction={0.7}
     dispersion={0.18}
     interaction="follow"
@@ -87,10 +89,10 @@ const cloudZh = [
     <dt>{t.about.affiliation}</dt><dd>{affiliation}</dd>
     <dt>{t.about.scholar}</dt>
     <dd>
-      {d.scholar ? <a class="link-underline" href={d.scholar} rel="noopener">{t.about.scholarLink}</a> : t.about.toBeSupplied}
+      {d.scholar ? <a class="link-underline tap" href={d.scholar} rel="noopener">{t.about.scholarLink}</a> : t.about.toBeSupplied}
     </dd>
     <dt>{t.about.cv}</dt>
-    <dd>{d.cv ? <a class="link-underline" href={d.cv}>{t.about.cvLink}</a> : t.about.toBeSupplied}</dd>
+    <dd>{d.cv ? <a class="link-underline tap" href={d.cv}>{t.about.cvLink}</a> : t.about.toBeSupplied}</dd>
     {d.links.length > 0 && (
       <>
         <dt>{t.about.links}</dt>
@@ -102,9 +104,9 @@ const cloudZh = [
     <div class="prose">{zhBio.length ? zhBio.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>
     <p class="meta continue">
       {lang === 'zh' ? (
-        <>{t.about.continue[0]}{' '}<a class="link-underline" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>、<a class="link-underline" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>。</>
+        <>{t.about.continue[0]}{' '}<a class="link-underline tap" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>、<a class="link-underline tap" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline tap" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>。</>
       ) : (
-        <>{t.about.continue[0]}{' '}<a class="link-underline" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>,{' '}<a class="link-underline" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>.</>
+        <>{t.about.continue[0]}{' '}<a class="link-underline tap" href={localePath(lang, '/#research')}>{t.about.continue[1]}</a>,{' '}<a class="link-underline tap" href={localePath(lang, '/publications/')}>{t.about.continue[2]}</a>{' '}{t.about.continue[3]}{' '}<a class="link-underline tap" href={localePath(lang, '/notes/')}>{t.about.continue[4]}</a>.</>
       )}
     </p>
   </div>
@@ -121,5 +123,7 @@ const cloudZh = [
   .about-grid { display: grid; grid-template-columns: minmax(240px, 30%) 1fr; gap: 56px; align-items: start; }
   .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
   .continue { margin-top: 40px; }
+  /* Phones: a taller panel opens a clear corner above the cloud where the lens rests. */
+  @media (max-width: 560px) { .about-glass { height: 430px; } }
   @media (max-width: 800px) { .about-grid { grid-template-columns: 1fr; gap: 32px; } }
 </style>

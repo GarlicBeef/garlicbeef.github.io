@@ -56,7 +56,7 @@ const enPath = lang === 'en' ? Astro.url.pathname : alt.href;
         <div class="site-footer__row meta">
           <nav aria-label={t.navLabel} class="site-footer__nav">
             {([['research', '#research'], ['publications', '#publications'], ['about', '#about'], ['notes', '#field-notes']] as const).map(([k, h], i) => (
-              <>{i > 0 && <span aria-hidden="true"> / </span>}<a class="link-underline" href={`${localePath(lang, '/')}${h}`}>{t.nav[k]}</a></>
+              <>{i > 0 && <span aria-hidden="true"> / </span>}<a class="link-underline tap" href={`${localePath(lang, '/')}${h}`}>{t.nav[k]}</a></>
             ))}
           </nav>
           <span>© {new Date().getFullYear()} {name}</span>
@@ -68,6 +68,8 @@ const enPath = lang === 'en' ? Astro.url.pathname : alt.href;
 
 <style>
   .site-footer { padding-top: 24px; padding-bottom: 40px; }
+  .site-footer__nav a { white-space: nowrap; }
+  @media (max-width: 720px) { .site-footer { padding-top: 8px; padding-bottom: 24px; } .site-footer__row { padding-top: 6px; } }
   .site-footer__row {
     display: flex;
     justify-content: space-between;

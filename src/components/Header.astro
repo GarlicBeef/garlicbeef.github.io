@@ -127,10 +127,14 @@ const items = [
     .site-header__inner { flex-direction: column; gap: 10px; padding-top: 14px; }
     .site-header__role { display: none; }
     .site-nav { gap: 18px; }
-    .site-nav__link { font-size: 11.5px; padding-block: 6px; }
+    .site-nav__link { font-size: 13px; padding-block: 13px 12px; }
+    .site-nav { gap: 16px; }
+    .site-nav__link { white-space: nowrap; }
     /* The language switch sits opposite the name, so the nav row keeps its full width. */
     .site-header__inner { position: relative; }
-    .site-lang { position: absolute; top: 11px; right: var(--gutter, 20px); padding: 3px 9px 4px; }
+    .site-lang { position: absolute; top: 4px; right: var(--gutter, 20px); padding: 3px 10px 4px; font-size: 13px; }
+    /* Invisible padding brings the switch to a 44px touch target. */
+    .site-lang::after { content: ''; position: absolute; inset: -10px -8px; }
   }
 </style>
 
@@ -148,19 +152,16 @@ const items = [
     const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
     const keyFor: Record<string, string> = { research: 'research', publications: 'publications', about: 'about', 'field-notes': 'notes' };
     const update = () => {
-      // The section taking up most of the visible area below the header is the current one;
-      // at the very bottom of the page the last section wins.
+      // A section becomes current once its top has passed a line 40% of the way down the
+      // visible area, i.e. once it clearly fills most of the screen; at the very bottom of
+      // the page the last section wins.
       const top = header?.offsetHeight ?? 0;
       const vh = window.innerHeight;
+      const line = top + (vh - top) * 0.4;
       let active = '';
-      let most = 0;
       for (const s of sections) {
         const r = s.getBoundingClientRect();
-        const seen = Math.max(0, Math.min(vh, r.bottom) - Math.max(top, r.top));
-        if (seen > most) {
-          most = seen;
-          active = keyFor[s.id];
-        }
+        if (r.top <= line && r.bottom > top) active = keyFor[s.id];
       }
       if (window.scrollY + vh >= document.documentElement.scrollHeight - 4) active = keyFor[sections[sections.length - 1].id];
       if (sections[0].getBoundingClientRect().top > vh * 0.5) active = '';

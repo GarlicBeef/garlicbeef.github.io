@@ -2,6 +2,7 @@
 name: Weikun Tian
 role: Postdoctoral Researcher and Marie Skłodowska-Curie Fellow
 headline: Postdoctoral Researcher · Max Planck Institute of Quantum Optics
+intro: I study how strong dipolar interactions shape many-body physics in ultracold molecules, and build the lasers, microwaves and vacuum systems that make it possible.
 researchField: Experimental AMO physics, ultracold atoms and molecules
 affiliation: Max Planck Institute of Quantum Optics, Garching, in the group of Prof. Immanuel Bloch
 scholar: "https://scholar.google.com/citations?user=MwWn2oYAAAAJ&hl=en"
@@ -11,6 +12,7 @@ zh:
   name: "田威坤"
   role: "博士后研究员、玛丽·居里学者"
   headline: "博士后研究员 · 马克斯·普朗克量子光学研究所"
+  intro: "我研究强偶极相互作用如何塑造超冷分子中的多体物理，也亲手搭建让这一切成为可能的激光、微波与真空系统。"
   researchField: "实验原子分子光物理（AMO），超冷原子与分子"
   affiliation: "马克斯·普朗克量子光学研究所（加兴），Immanuel Bloch 教授课题组"
   body: |

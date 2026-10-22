@@ -96,15 +96,20 @@
   flex-shrink: 0;
 }
 .rt__step button {
-  background: none;
-  border: 0;
-  padding: 10px 2px;
+  min-height: 44px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
   cursor: pointer;
-  color: var(--ink-2);
+  color: var(--ink);
   font-family: var(--mono);
   font-size: 13px;
+  transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
 }
-.rt__step button:disabled { color: var(--faint); cursor: default; }
+.rt__step button:hover:not(:disabled) { border-color: var(--ink-2); }
+.rt__step button:not(:disabled):last-child { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.rt__step button:disabled { color: var(--faint); border-color: var(--rule); cursor: default; }
 
 /* ---------- Year wheel (React Bits OptionWheel, driven by page scroll) ---------- */
 .rt__drum {

@@ -87,7 +87,7 @@ function Frame({
           </span>
         </span>
         <span className="fs__inline-caption meta" aria-hidden="true">
-          <span className="fs__inline-title">{note.title}</span>
+          <span className="fs__inline-title"><span className="fs__inline-num">{String(note.frame).padStart(2, '0')}</span>{note.title}</span>
           <span>
             {note.date}
             {note.location ? ` / ${note.location}` : ''}
