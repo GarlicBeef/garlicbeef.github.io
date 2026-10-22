@@ -11,7 +11,7 @@
   position: relative;
   aspect-ratio: 1.18 / 1;
   width: 100%;
-  max-height: min(78vh, 760px);
+  max-height: min(64vh, 620px);
   margin-inline: auto;
 }
 
@@ -45,7 +45,7 @@
   align-items: baseline;
   padding: 10px 0;
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.45;
   color: var(--muted);
   transition: color var(--t-fast) var(--ease);
@@ -80,7 +80,7 @@
 }
 .ar__caption .meta { margin: 0 0 4px; }
 .ar__caption-summary { color: var(--ink-2) !important; }
-.ar__caption-hint { color: var(--faint) !important; margin-top: 8px !important; }
+.ar__caption-hint { color: var(--muted) !important; margin-top: 8px !important; }
 .ar__all { display: inline-block; margin-top: 22px; }
 
 @media (max-width: 1100px) {
@@ -105,5 +105,5 @@
   .ar__stage { aspect-ratio: 1.05 / 1; }
   .ar__caption-body { min-height: 0; }
   .ar__caption-hint { display: none; }
-  .ar__index a { padding: 13px 0; font-size: 12px; }
+  .ar__index a { padding: 13px 0; font-size: 13px; }
 }

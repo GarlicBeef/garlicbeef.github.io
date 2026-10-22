@@ -47,8 +47,11 @@ export async function responsive(
   widths: number[] = [640, 960, 1280, 1600, 2000],
 ): Promise<ResponsiveImage> {
   const usable = widths.filter((w) => w <= src.width);
-  const img = await getImage({ src, widths: usable.length ? usable : [src.width], format: 'webp', quality: 82 });
-  return { src: img.src, srcSet: img.srcSet.attribute, width: src.width, height: src.height };
+  const list = usable.length ? usable : [src.width];
+  const img = await getImage({ src, widths: list, format: 'webp', quality: 74 });
+  // Fallback src: a mid-size variant rather than the full-resolution original.
+  const fallback = await getImage({ src, width: list[Math.floor((list.length - 1) / 2)], format: 'webp', quality: 74 });
+  return { src: fallback.src, srcSet: img.srcSet.attribute, width: src.width, height: src.height };
 }
 
 const dateFmt = {

@@ -28,7 +28,7 @@ const zhBody = lang === 'zh' ? paragraphs(d.zh?.body) : [];
     </header>
 
     <FadeContent client:load effect="develop" duration={0.9} trigger="mount" className="detail-photo">
-      <Image src={d.image} alt={pick(d, 'imageAlt', lang)} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 900px) 100vw, 80vw" loading="eager" fetchpriority="high" />
+      <Image quality={74} src={d.image} alt={pick(d, 'imageAlt', lang)} widths={[800, 1200, 1600, 2000]} sizes="(max-width: 900px) 100vw, 80vw" loading="eager" fetchpriority="high" />
     </FadeContent>
 
     <div class="detail-grid">

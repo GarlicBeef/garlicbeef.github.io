@@ -46,9 +46,10 @@
   justify-content: space-between;
   align-items: flex-end;
   padding: 0 16px 5px;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
-  color: var(--amber);
+  color: #e8a24c;
+  font-weight: 500;
   background-image: var(--holes);
   background-repeat: repeat-x;
   background-size: 24px 12px;
@@ -165,7 +166,7 @@
 @media (min-width: 1680px) { .fs { --frame-h: 296px; } }
 @media (max-width: 720px) {
   .fs { --frame-h: 200px; --band: 30px; }
-  .fs__edge { font-size: 9px; padding-inline: 10px; }
+  .fs__edge { font-size: 10.5px; padding-inline: 10px; }
   .fs__edge-mark { display: none; }
   .fs__edge--top { align-items: flex-end; padding-bottom: 2px; }
   .fs__edge--bottom { padding-top: 2px; }

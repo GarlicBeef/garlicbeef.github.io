@@ -54,7 +54,11 @@ const enPath = lang === 'en' ? Astro.url.pathname : alt.href;
       <footer class="site-footer wrap">
         <hr class="rule" />
         <div class="site-footer__row meta">
-          <span>{t.footer}</span>
+          <nav aria-label={t.navLabel} class="site-footer__nav">
+            {([['research', '#research'], ['publications', '#publications'], ['about', '#about'], ['notes', '#field-notes']] as const).map(([k, h], i) => (
+              <>{i > 0 && <span aria-hidden="true"> / </span>}<a class="link-underline" href={`${localePath(lang, '/')}${h}`}>{t.nav[k]}</a></>
+            ))}
+          </nav>
           <span>© {new Date().getFullYear()} {name}</span>
         </div>
       </footer>

@@ -83,7 +83,7 @@ const items = [
   }
   .site-header__role {
     font-family: var(--mono);
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--muted);
     letter-spacing: 0.02em;
   }
@@ -148,12 +148,22 @@ const items = [
     const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
     const keyFor: Record<string, string> = { research: 'research', publications: 'publications', about: 'about', 'field-notes': 'notes' };
     const update = () => {
-      const probe = window.innerHeight * 0.35;
+      // The section taking up most of the visible area below the header is the current one;
+      // at the very bottom of the page the last section wins.
+      const top = header?.offsetHeight ?? 0;
+      const vh = window.innerHeight;
       let active = '';
+      let most = 0;
       for (const s of sections) {
         const r = s.getBoundingClientRect();
-        if (r.top <= probe && r.bottom > probe) active = keyFor[s.id];
+        const seen = Math.max(0, Math.min(vh, r.bottom) - Math.max(top, r.top));
+        if (seen > most) {
+          most = seen;
+          active = keyFor[s.id];
+        }
       }
+      if (window.scrollY + vh >= document.documentElement.scrollHeight - 4) active = keyFor[sections[sections.length - 1].id];
+      if (sections[0].getBoundingClientRect().top > vh * 0.5) active = '';
       links.forEach((a) => {
         const on = a.dataset.nav === active;
         a.classList.toggle('is-active', on);

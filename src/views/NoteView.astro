@@ -27,7 +27,7 @@ const zhBody = lang === 'zh' ? paragraphs(d.zh?.body) : [];
       <p class="meta"><time datetime={isoDate(d.date)}>{formatDate(d.date, lang)}</time>{location && ` / ${location}`}</p>
     </header>
     <FadeContent client:load effect="develop" duration={1.1} trigger="mount" className="note-photo">
-      <Image src={d.cover} alt={pick(d, 'coverAlt', lang)} widths={[720, 1200, 1800]} sizes="(max-width: 900px) 100vw, 70vw" loading="eager" />
+      <Image quality={74} src={d.cover} alt={pick(d, 'coverAlt', lang)} widths={[720, 1200, 1800]} sizes="(max-width: 900px) 100vw, 70vw" loading="eager" />
     </FadeContent>
     {d.demo && <p class="notice">{lang === 'zh' ? '示例札记：图片与文字均为占位内容。' : 'Demonstration note — illustrative image and placeholder text.'}</p>}
     <div class="prose">{zhBody.length ? zhBody.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>

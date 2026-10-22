@@ -23,11 +23,11 @@ const TAB = { w: 0.48, h: 0.27 };
 const LEAN = -0.17; // radians, files lean back
 const HEIGHTS = [0.0, 0.16, 0.06, 0.22, 0.1, 0.18];
 /** Hover pose: how far a file rises and comes forward, and how much it straightens. */
-const LIFT = { y: 0.5, z: 0.22, lean: LEAN * 0.55 };
+const LIFT = { y: 0.78, z: 0.26, lean: LEAN * 0.5 };
 /** Viewing direction (camera position relative to the subject). Distance is fitted automatically. */
 const VIEW_DIR = new THREE.Vector3(7.15, 2.75, 8.6).normalize();
 /** Fraction of the canvas the framed object may fill (leaves a margin on every side). */
-const FILL = 0.86;
+const FILL = 0.9;
 
 const fileBase = (index: number, count: number) => {
   const spacing = (BOX.d - 0.7) / Math.max(1, count - 1);
@@ -225,7 +225,8 @@ function paperTexture(paper: ArchivePaper, index: number, onUpdate: () => void) 
     const bx = M;
     const by = headerBottom;
     const bw = W - 2 * M;
-    const bh = H - by - 70;
+    // Kept in the upper part of the sheet, which stays clear of the box when a file is lifted.
+    const bh = Math.min(H - by - 70, H * 0.66 - by);
     const im = new Image();
     im.decoding = 'async';
     im.onload = () => {

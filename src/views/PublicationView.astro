@@ -51,7 +51,7 @@ const links = [
       </div>
       <figure class="pub-fig">
         {d.figure ? (
-          <Image src={d.figure} alt={figureAlt ?? ''} widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 40vw" />
+          <Image quality={74} src={d.figure} alt={figureAlt ?? ''} widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 40vw" />
         ) : (
           <div class="pub-fig__svg" set:html={figureSvg(d.figureKind, index + 1)} />
         )}

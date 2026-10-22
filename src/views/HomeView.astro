@@ -54,7 +54,7 @@ const papers: ArchivePaper[] = await Promise.all(publications.map(async (p, i) =
   summary: pick(p.data, 'summary', lang),
   href: publicationHref(p, lang),
   figureKind: p.data.figureKind,
-  figureSrc: p.data.figure ? (await getImage({ src: p.data.figure, width: Math.min(1200, p.data.figure.width), format: 'webp', quality: 85 })).src : undefined,
+  figureSrc: p.data.figure ? (await getImage({ src: p.data.figure, width: Math.min(1200, p.data.figure.width), format: 'webp', quality: 78 })).src : undefined,
   demo: p.data.demo,
 })));
 
@@ -125,8 +125,7 @@ const first = researchItems[0]?.image;
   .room { outline: none; }
   .room--publications {
     padding-top: clamp(40px, 7vh, 72px);
-    padding-bottom: clamp(48px, 8vh, 96px);
-    min-height: calc(100vh - var(--header-h));
+    padding-bottom: clamp(32px, 5vh, 64px);
   }
   .room--notes {
     padding-top: clamp(40px, 7vh, 72px);
@@ -135,9 +134,10 @@ const first = researchItems[0]?.image;
   .room__head { margin-bottom: clamp(24px, 4vh, 40px); }
   .room--about {
     padding-top: clamp(40px, 7vh, 72px);
-    padding-bottom: clamp(56px, 10vh, 120px);
+    padding-bottom: clamp(40px, 6vh, 72px);
   }
-  .room--about .room__head { margin-bottom: clamp(32px, 6vh, 64px); }
+  /* The glass panel has its own air above the word cloud. */
+  .room--about .room__head { margin-bottom: clamp(4px, 1vh, 16px); }
 
   .room__label { margin: 0 0 6px; font-weight: 400; }
   .room__intro { margin: 0; }

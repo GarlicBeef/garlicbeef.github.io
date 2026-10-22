@@ -25,9 +25,9 @@ interface Props {
 }
 
 /** Scroll travel per project transition, as a fraction of the viewport height. */
-const STEP_VH = 0.55;
+const STEP_VH = 0.45;
 /** Dwell at the start and end of the sequence. */
-const HOLD_VH = 0.22;
+const HOLD_VH = 0.12;
 const SCROLL_MQ = '(min-width: 900px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
 const REDUCE_MQ = '(prefers-reduced-motion: reduce)';
 
@@ -251,6 +251,7 @@ export default function ResearchTimeline({ items, sizes, lang = 'en' }: Props) {
                 className="rt__wheel"
               />
             </div>
+            <p className="meta rt__wheel-hint" aria-hidden="true">{t.research.pick}</p>
             <p className="meta rt__aside">{t.research.aside}</p>
         </div>
       </div>

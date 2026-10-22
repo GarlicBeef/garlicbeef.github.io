@@ -16,7 +16,7 @@ export const ui = {
     nav: { research: 'Research', publications: 'Publications', about: 'About', notes: 'Field Notes' },
     switchTo: '中文',
     switchLabel: '阅读中文版',
-    footer: 'Research / Films / Everyday observations',
+    footer: 'Research / Publications / About / Field Notes',
     sections: {
       research: '01 — Research',
       publications: '02 — Publications',
@@ -30,6 +30,7 @@ export const ui = {
     },
     research: {
       aside: 'Selected experiments, over time',
+      pick: '↕ Select a year',
       newer: '← Newer',
       older: 'Older →',
       inYear: (i: number, n: number) => `${i} of ${n} this year`,
@@ -99,7 +100,7 @@ export const ui = {
     nav: { research: '研究', publications: '论文', about: '关于', notes: '札记' },
     switchTo: 'EN',
     switchLabel: 'Read in English',
-    footer: '研究 / 电影 / 日常观察',
+    footer: '研究 / 论文 / 关于 / 札记',
     sections: {
       research: '01 — 研究',
       publications: '02 — 论文',
@@ -113,6 +114,7 @@ export const ui = {
     },
     research: {
       aside: '实验选辑，按时间排列',
+      pick: '↕ 选择年份',
       newer: '← 较新',
       older: '较早 →',
       inYear: (i: number, n: number) => `本年 ${i} / ${n}`,

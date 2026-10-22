@@ -19,7 +19,7 @@ const t = tr(lang);
       {all.map((n) => (
         <li>
           <a href={noteHref(n, lang)} class="n-card">
-            <Image src={n.data.cover} alt={pick(n.data, 'coverAlt', lang)} widths={[480, 800]} sizes="(max-width: 640px) 100vw, 33vw" class="n-img" style={`object-position: ${n.data.coverPosition}`} />
+            <Image quality={74} src={n.data.cover} alt={pick(n.data, 'coverAlt', lang)} widths={[480, 800]} sizes="(max-width: 640px) 100vw, 33vw" class="n-img" style={`object-position: ${n.data.coverPosition}`} />
             <span class="n-title">{pick(n.data, 'title', lang)}</span>
             <span class="meta">{formatDate(n.data.date, lang)}{pick(n.data, 'location', lang) && ` / ${pick(n.data, 'location', lang)}`}</span>
           </a>
