@@ -14,7 +14,7 @@ const profile = await getProfile();
 const { Content } = await render(profile);
 const d = profile.data;
 const zhBio = lang === 'zh' ? paragraphs(d.zh?.body) : [];
-const role = lang === 'zh' ? '马克斯·普朗克量子光学研究所 博士后' : 'PostDoc at Max Planc Institute of Quantum Optics';
+const role = pick(d, 'role', lang);
 const field = pick(d, 'researchField', lang) ?? t.about.toBeSupplied;
 const affiliation = pick(d, 'affiliation', lang) ?? t.about.toBeSupplied;
 
@@ -87,11 +87,16 @@ const cloudZh = [
     <dt>{t.about.affiliation}</dt><dd>{affiliation}</dd>
     <dt>{t.about.scholar}</dt>
     <dd>
-      {d.links.length ? (
-        <ul class="links">{d.links.map((l) => <li><a class="link-underline" href={l.href}>{l.label}</a></li>)}</ul>
-      ) : t.about.toBeSupplied}
+      {d.scholar ? <a class="link-underline" href={d.scholar} rel="noopener">{t.about.scholarLink}</a> : t.about.toBeSupplied}
     </dd>
-    <dt>{t.about.cv}</dt><dd>{affiliation}</dd>
+    <dt>{t.about.cv}</dt>
+    <dd>{d.cv ? <a class="link-underline" href={d.cv}>{t.about.cvLink}</a> : t.about.toBeSupplied}</dd>
+    {d.links.length > 0 && (
+      <>
+        <dt>{t.about.links}</dt>
+        <dd><ul class="links">{d.links.map((l) => <li><a class="link-underline" href={l.href}>{l.label}</a></li>)}</ul></dd>
+      </>
+    )}
   </dl>
   <div>
     <div class="prose">{zhBio.length ? zhBio.map((p) => <p set:html={inlineMd(p)} />) : <Content />}</div>

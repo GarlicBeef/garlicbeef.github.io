@@ -228,7 +228,7 @@ button { font: inherit; color: inherit; }
 :lang(zh) body { line-break: strict; word-break: normal; overflow-wrap: anywhere; }
 :lang(zh) .label { letter-spacing: 0.04em; }
 :lang(zh) .meta { font-size: 12.5px; letter-spacing: 0.02em; line-height: 1.75; }
-:lang(zh) .prose { max-width: 38em; font-size: 16px; line-height: 1.9; text-align: justify; }
+:lang(zh) .prose { max-width: 38em; font-size: 16px; line-height: 1.9; }
 :lang(zh) .prose p { margin-bottom: 1.2em; }
 :lang(zh) .page-title { letter-spacing: 0.02em; line-height: 1.35; }
 :lang(zh) [lang='en'] { text-align: start; }

@@ -22,7 +22,7 @@ const t = tr(lang);
 const name = pick(profile.data, 'name', lang);
 const role = pick(profile.data, 'role', lang);
 const fullTitle = title ? `${title} — ${name}` : `${name} — ${role}`;
-const desc = description ?? (lang === 'zh' ? `${name}，${role}。${t.about.descSuffix}` : `${name}, ${role.toLowerCase()}. ${t.about.descSuffix}`);
+const desc = description ?? (lang === 'zh' ? `${name}，${role}。${t.about.descSuffix}` : `${name}, ${role}. ${t.about.descSuffix}`);
 const alt = alternatePath(lang, Astro.url.pathname);
 const enPath = lang === 'en' ? Astro.url.pathname : alt.href;
 ---

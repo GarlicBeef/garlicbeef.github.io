@@ -11,7 +11,7 @@ const t = tr(lang);
 const profile = await getProfile();
 const d = profile.data;
 const name = pick(d, 'name', lang);
-const identity = [pick(d, 'role', lang), pick(d, 'researchField', lang), pick(d, 'affiliation', lang)].filter(Boolean).join(' · ');
+const identity = pick(d, 'headline', lang) ?? pick(d, 'role', lang);
 const home = localePath(lang, '/');
 const other = alternatePath(lang, Astro.url.pathname);
 

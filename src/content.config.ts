@@ -93,13 +93,19 @@ const profile = defineCollection({
     role: z.string(),
     researchField: z.string().optional(),
     affiliation: z.string().optional(),
+    /** Short line under the name in the header; falls back to the role. */
+    headline: z.string().optional(),
+    /** Google Scholar profile URL. */
+    scholar: z.string().url().optional(),
+    /** CV link, e.g. "/cv.pdf" for a PDF placed in public/. */
+    cv: z.string().optional(),
     links: z
       .array(z.object({ label: z.string(), href: z.string() }))
       .default([]),
     demo: z.boolean().default(false),
     /** Chinese translations; any field left out falls back to English. */
     zh: z
-      .object({ name: z.string(), role: z.string(), researchField: z.string(), affiliation: z.string(), body: z.string() })
+      .object({ name: z.string(), role: z.string(), headline: z.string(), researchField: z.string(), affiliation: z.string(), body: z.string() })
       .partial()
       .optional(),
   }),
